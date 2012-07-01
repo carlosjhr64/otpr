@@ -5,7 +5,7 @@ INSTALL:
 
 USAGE:
 
-To use rotp, you have to have a Google Cloud Storage service:
+To use otpr, you have to have a Google Cloud Storage service:
 
 	https://developers.google.com/storage/docs/getting-started
 
@@ -21,7 +21,7 @@ you should have the following information:
 
 Your intialization run will look something like the following:
 
-	$ rotp --init TheBucketName ThePadName /media/1234-4567/cipher.pad
+	$ otpr --init TheBucketName ThePadName /media/1234-4567/cipher.pad
 	Access Key: 
 	YOURGOOGLEACCESSKEEY
 	Secret Key: 
@@ -30,7 +30,7 @@ Your intialization run will look something like the following:
 	SuperSecretMasterPasswordVeryLongAndStoredInFireSafe
 	SuperSecretMasterPasswordVeryLongAndStoredInFireSafe
 
-You tell rotp that you're initiating a pad with the --init option.
+You tell otpr that you're initiating a pad with the --init option.
 
 I recommend you use the optional backup.
 But either way be consistent.
@@ -52,7 +52,7 @@ you can get your master password from google storage.
 
 You get back your master password this way:
 
-	rotp  ThePadName /media/1234-5678/cipher.pad
+	otpr  ThePadName /media/1234-5678/cipher.pad
 	Pin: 
 	Sup
 	SuperSecretMasterPasswordVeryLongAndStoredInFireSafe
@@ -62,28 +62,28 @@ which is like a "pin number".  The first three letters of your master password i
 
 You can change your master password:
 
-	rotp --new TheBucketName ThePadName /media/1234-5678/cipher.pad
+	otpr --new TheBucketName ThePadName /media/1234-5678/cipher.pad
 	Password: 
 	AnotherVeryLongRidculouslyLongPasswordSavedInFireSafe
 	AnotherVeryLongRidculouslyLongPasswordSavedInFireSafe
 
-The --new option tells rotp to store a new password.
+The --new option tells otpr to store a new password.
 And check that's there:
 
-	rotp TheBucketName ThePadName /media/1234-5678/cipher.pad
+	otpr TheBucketName ThePadName /media/1234-5678/cipher.pad
 	Pin: 
 	Ano
 	AnotherVeryLongRidculouslyLongPasswordSavedInFireSafe
 
 Here's what happens on a bad pin:
 
-	rotp TheBucketName ThePadName /media/1234-56778/cipher.pad
+	otpr TheBucketName ThePadName /media/1234-56778/cipher.pad
 	Pin: 
 	NOP
 	could not get password
 
 The key files are stored in:
-	~/.rotp
+	~/.otpr
 It's security is based primarily on the file system permissions, set to readable by the user only.
 It contains your google access/secret keys.
 The files are encrypted using your bucket name and pad name to create the encription key,

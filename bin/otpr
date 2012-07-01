@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 version = '0.0.0'
 help = <<EOT
-Usage:	rotp bucket pad-name [backup]
+Usage:	otpr bucket pad-name [backup]
 Options:
 	-v --version
 	-h		short help
@@ -11,9 +11,9 @@ Options:
 EOT
 more = <<EOT
 GitHub page:
-	https://github.com/carlosjhr64/rotp
+	https://github.com/carlosjhr64/otpr
 RubyGem page:
-	https://rubygems.org/gems/rotp
+	https://rubygems.org/gems/otpr
 Google Cloud Storage
 	https://developers.google.com/storage/
 EOT
@@ -59,9 +59,9 @@ def ask(question)
 end
 
 begin
-  require 'rotp'
+  require 'otpr'
   password = ''
-  rotc = ROTP.new( bucket, padname, backup )
+  rotc = OTPR.new( bucket, padname, backup )
   case options
   when /i/ # initialize
     password = rotc.initialize_pad( ask( "Access Key: " ), ask( "Secret Key: " ), ask( "Password: " ) )

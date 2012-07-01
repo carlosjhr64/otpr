@@ -12,14 +12,14 @@ require 'kconv'
 gem 'gstore','= 0.2.1'
 require 'gstore'
 
-class ROTP
+class OTPR
 
   # SOME CONFIGURATION
   PINLENGTH = 3
   MINLENGTH = 7
 
   # WHERE ARE YOU?
-  DIRECTORY = File.expand_path('~/.rotp')
+  DIRECTORY = File.expand_path('~/.otpr')
   Dir.mkdir(DIRECTORY, 0700) if !File.exist?(DIRECTORY)
 
   DNEW = ".new"
@@ -77,7 +77,7 @@ class ROTP
 
   def set_backup( backup0 )
     begin
-      ROTP.check_backup(backup0)
+      OTPR.check_backup(backup0)
     rescue Exception
       raise $! unless $!.message == NOT_AVAILABLE
     end
@@ -110,7 +110,7 @@ class ROTP
   end
 
   def padid
-    ROTP.digest(cryptkey)
+    OTPR.digest(cryptkey)
   end
 
   def bucketdir
@@ -156,9 +156,9 @@ class ROTP
   end
 
   def initialize_client(akey0,skey0)
-    ROTP.valid_keys(akey0,skey0)
+    OTPR.valid_keys(akey0,skey0)
     namex = Regexp.new("<Name>#{@bucket}</Name>")
-    raise "can't get bucket" unless (ROTP.client(akey0,skey0).list_buckets =~ namex)
+    raise "can't get bucket" unless (OTPR.client(akey0,skey0).list_buckets =~ namex)
     set_keys(akey0,skey0)
   end
 
@@ -171,13 +171,13 @@ class ROTP
   end
 
   def client
-    ROTP.client(akey,skey)
+    OTPR.client(akey,skey)
   end
 
   def reset_password(password0)
-    ROTP.valid_password( password0 )
-    key0 = ROTP.rndstr
-    key1 = ROTP.xor_cipher(password0[0..(PINLENGTH-1)],key0)
+    OTPR.valid_password( password0 )
+    key0 = OTPR.rndstr
+    key1 = OTPR.xor_cipher(password0[0..(PINLENGTH-1)],key0)
     cipher = Crypt::XXTEA.encrypt(key1,password0)
     # What happens here is if the copy to backup fails,
     # the OTP does not regenerate, but remains effective.
@@ -193,13 +193,13 @@ class ROTP
   end
 
   def new_password(password0)
-    ROTP.check_backup(@backup) if @backup
+    OTPR.check_backup(@backup) if @backup
     reset_password(password0)
   end
 
   def initialize_pad( akey0, skey0, password0 )
     # Need to ensure initiation can write to backup
-    ROTP.check_backup(@backup) if @backup
+    OTPR.check_backup(@backup) if @backup
     initialize_client(akey0,skey0)
     reset_password(password0)
   end
@@ -213,12 +213,12 @@ class ROTP
       cipher0 = client.get_object(@bucket,cipherpad)
     end
     key0 = File.read(keypad)
-    key1 = ROTP.xor_cipher(pin0,key0)
+    key1 = OTPR.xor_cipher(pin0,key0)
     Crypt::XXTEA.decrypt(key1,cipher0)
   end
 
   def pin_password( pin0 )
-    ROTP.valid_pin(pin0)
+    OTPR.valid_pin(pin0)
     password0 = get_password( pin0 )
     raise "could not get password" unless password0[0..(PINLENGTH-1)] == pin0
     reset_password(password0)

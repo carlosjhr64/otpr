@@ -2,7 +2,7 @@
 require 'digest/md5'
 errors = 0
 puts
-run = 'ruby -I ./lib ./bin/rotp'
+run = 'ruby -I ./lib ./bin/otpr'
 puts "Version(-v):"
 puts (out = `#{run} -v`)
 puts (dg = Digest::MD5.hexdigest(out))
@@ -12,13 +12,13 @@ puts
 puts "Help(-h):"
 puts (out = `#{run} -h`)
 puts (dg = Digest::MD5.hexdigest(out))
-puts (dg=='1de727d48b4ee6314c7e225832928af1')? "OK" : (errors+=1) && "BAD"
+puts (dg=='e426b83d87a201f41dbfdfec4fdae484')? "OK" : (errors+=1) && "BAD"
 puts
 puts
 puts "Help(-H):"
 puts (out = `#{run} -H`)
 puts (dg = Digest::MD5.hexdigest(out))
-puts (dg=='33ea9e59b4d70bfd5bc63baec2640e3b')? "OK" : (errors+=1) && "BAD"
+puts (dg=='313323db11d65de44eef761230116ecb')? "OK" : (errors+=1) && "BAD"
 puts
 puts
 puts "Oooops!(--caca):"
@@ -29,7 +29,7 @@ puts
 puts "Output to stderr:"
 puts (out = `cat ./temp`)
 puts (dg = Digest::MD5.hexdigest(out))
-puts (dg=='8cd9650f2ef167f6b09083e763e07a90')? "OK" : (errors+=1) && "BAD"
+puts (dg=='cd86e99c4fde7fbd90b2c27cb2a611fa')? "OK" : (errors+=1) && "BAD"
 puts
 if errors == 0 then
   def ask(question)
@@ -47,7 +47,7 @@ if errors == 0 then
   akey = ask("Access Key: ")
   skey = ask("Secret Key: ")
   puts (progress = "A")
-  IO.popen("ruby -I ./lib ./bin/rotp --init #{bucket} #{padname} #{backup}",'w+') do |pipe|
+  IO.popen("ruby -I ./lib ./bin/otpr --init #{bucket} #{padname} #{backup}",'w+') do |pipe|
 
     puts (progress = "Reponding to access key")
     question = pipe.gets.strip
