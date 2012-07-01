@@ -6,31 +6,30 @@ run = 'ruby -I ./lib ./bin/rotp'
 puts "Version(-v):"
 puts (out = `#{run} -v`)
 puts (dg = Digest::MD5.hexdigest(out))
-puts (dg=='09fea378b96141413f5f09444573f0f3')? "OK" : "BAD" && errors+=1
+puts (dg=='09fea378b96141413f5f09444573f0f3')? "OK" : (errors+=1) && "BAD"
 puts
 puts
 puts "Help(-h):"
 puts (out = `#{run} -h`)
 puts (dg = Digest::MD5.hexdigest(out))
-puts (dg=='b6ede9c0a1d3423f872b16f6373cb452')? "OK" : "BAD" && errors+=1
+puts (dg=='3bfabe673854613c45eece2309d9d57f')? "OK" : (errors+=1) && "BAD"
 puts
 puts
 puts "Help(-H):"
 puts (out = `#{run} -H`)
 puts (dg = Digest::MD5.hexdigest(out))
-puts (dg=='7906ad1076af7ed1221483ac438fbdf6')? "OK" : "BAD" && errors+=1
+puts (dg=='53fd2bd5d746c5574bde1d89ad26cd6b')? "OK" : (errors+=1) && "BAD"
 puts
 puts
 puts "Oooops!(--caca):"
 puts (out = `#{run} --caca 2> ./temp`)
 puts (dg = Digest::MD5.hexdigest(out))
-puts (dg=='d41d8cd98f00b204e9800998ecf8427e')? "OK" : "BAD" && errors+=1
+puts (dg=='d41d8cd98f00b204e9800998ecf8427e')? "OK" : (errors+=1) && "BAD"
 puts
 puts "Output to stderr:"
 puts (out = `cat ./temp`)
 puts (dg = Digest::MD5.hexdigest(out))
-puts (dg=='8ece872087ef86f64be53b7d3279100b')? "OK" : "BAD" && errors+=1
-puts
+puts (dg=='d40ace89c2288c13c84c3a4c75874f49')? "OK" : (errors+=1) && "BAD"
 puts
 if errors == 0 then
   def ask(question)
@@ -48,23 +47,30 @@ if errors == 0 then
   akey = ask("Access Key: ")
   skey = ask("Secret Key: ")
   puts (progress = "A")
-  IO.popen("ruby -I ./lib ./bin/rotp --strict --init #{bucket} #{padname} #{backup}",'w+') do |pipe|
-    puts (progress = "B")
-    question = pipe.gets.strip # should ask for password
-    break unless question == "Password:"
-    puts (progress = "C")
-    pipe.puts password
+  IO.popen("ruby -I ./lib ./bin/rotp --init #{bucket} #{padname} #{backup}",'w+') do |pipe|
+
+    puts (progress = "Reponding to access key")
     question = pipe.gets.strip
     break unless question == "Access Key:"
-    puts (progress = "D")
+    puts (progress = "puts aceess key")
     pipe.puts akey
+
+    puts (progress = "Reponding to secret key")
     question = pipe.gets.strip
     break unless question == "Secret Key:"
-    puts (progress = "E")
+    puts (progress = "puts seecret key")
     pipe.puts skey
-    puts (progress = "F")
+
+    puts (progress = "Reponding to password")
+    question = pipe.gets.strip
+    break unless question == "Password:"
+    puts (progress = "puts password...")
+    pipe.puts password
+
+    puts (progress = "Done")
+
   end
-  if !(progress == "F") then
+  if !(progress == "Done") then
     puts "Could not complete initiation.  Got to step #{progress}"
     errors += 1 
   end

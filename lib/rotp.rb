@@ -177,7 +177,7 @@ class ROTP
   def reset_password(password0)
     ROTP.valid_password( password0 )
     key0 = ROTP.rndstr
-    key1 = ROTP.xor_cipher(pin,key0)
+    key1 = ROTP.xor_cipher(password0[0..(PINLENGTH-1)],key0)
     cipher = Crypt::XXTEA.encrypt(key1,password0)
     # What happens here is if the copy to backup fails,
     # the OTP does not regenerate, but remains effective.
@@ -198,15 +198,21 @@ class ROTP
     reset_password(password0)
   end
 
-  def get_password
-    cipher0 = client.get_object(@bucket,cipherpad)
+  def get_password( pin0 )
+    cipher0 = nil
+    # assuming backup is the faster read
+    if @backup && File.exist?(@backup) then
+      cipher0 = File.read(@backup)
+    else
+      cipher0 = client.get_object(@bucket,cipherpad)
+    end
     key0 = File.read(keypad)
-    key1 = ROTP.xor_cipher(pin,key0)
+    key1 = ROTP.xor_cipher(pin0,key0)
     Crypt::XXTEA.decrypt(key1,cipher0)
   end
 
   def pin_password( pin0 )
-    password0 = get_password
+    password0 = get_password( pin0 )
     raise "could not get password" unless password0[0..(PINLENGTH-1)] == pin0
     reset(password0)
   end
