@@ -214,7 +214,8 @@ class ROTP
   def pin_password( pin0 )
     password0 = get_password( pin0 )
     raise "could not get password" unless password0[0..(PINLENGTH-1)] == pin0
-    reset(password0)
+    reset_password(password0)
+    return password0
   end
 
 end
