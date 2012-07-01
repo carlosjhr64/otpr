@@ -12,13 +12,13 @@ puts
 puts "Help(-h):"
 puts (out = `#{run} -h`)
 puts (dg = Digest::MD5.hexdigest(out))
-puts (dg=='3bfabe673854613c45eece2309d9d57f')? "OK" : (errors+=1) && "BAD"
+puts (dg=='1de727d48b4ee6314c7e225832928af1')? "OK" : (errors+=1) && "BAD"
 puts
 puts
 puts "Help(-H):"
 puts (out = `#{run} -H`)
 puts (dg = Digest::MD5.hexdigest(out))
-puts (dg=='53fd2bd5d746c5574bde1d89ad26cd6b')? "OK" : (errors+=1) && "BAD"
+puts (dg=='33ea9e59b4d70bfd5bc63baec2640e3b')? "OK" : (errors+=1) && "BAD"
 puts
 puts
 puts "Oooops!(--caca):"
@@ -29,7 +29,7 @@ puts
 puts "Output to stderr:"
 puts (out = `cat ./temp`)
 puts (dg = Digest::MD5.hexdigest(out))
-puts (dg=='d40ace89c2288c13c84c3a4c75874f49')? "OK" : (errors+=1) && "BAD"
+puts (dg=='8cd9650f2ef167f6b09083e763e07a90')? "OK" : (errors+=1) && "BAD"
 puts
 if errors == 0 then
   def ask(question)

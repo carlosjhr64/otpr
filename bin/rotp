@@ -8,17 +8,14 @@ Options:
 	--help		long help
 	-i --init	initialize your pad
 	-n --new	reset you password
-	-q --quiet
 EOT
 more = <<EOT
-If the backup directory is given but unavailable,
-the one time pad will be read but not reset and
-you will not be able to set a new password.
-This is to keep the backup cypher paired to the local key.
-Bucket is the Google Store bucket name.
-Because you can have multiple pads,
-you need to identify the pads.
-"bucket/padname" uniquely identifies a pad.
+GitHub page:
+	https://github.com/carlosjhr64/rotp
+RubyGem page:
+	https://rubygems.org/gems/rotp
+Google Cloud Storage
+	https://developers.google.com/storage/
 EOT
 
 bucket = padname = backup = options = nil
@@ -28,7 +25,6 @@ begin
   MAP = Hash.new {|hash,k| raise "#{k} not implemented"	if k=~/^--/; k.sub(/^-+/,'') }
   MAP['--init']		= 'i'
   MAP['--new']		= 'n'
-  MAP['--quiet']	= 'q'
   MAP['--version']	= 'v'
   MAP['--help']		= 'H'
   # GET THE OPTIONS

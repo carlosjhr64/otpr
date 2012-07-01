@@ -13,6 +13,6 @@ Gem::Specification.new do |s|
   s.authors     = ["Carlos Hernandez"]
   s.email       = 'carlosjhr64@gmail.com'
   s.files       = ["lib/rotp.rb"]
-  s.executables	<< "bin/rotp"
+  s.executables	<< "rotp"
   s.homepage    = 'https://github.com/carlosjhr64/rotp'
 end
