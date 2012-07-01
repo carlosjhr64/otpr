@@ -22,6 +22,8 @@ class ROTP
   DIRECTORY = File.expand_path('~/.rotp')
   Dir.mkdir(DIRECTORY, 0700) if !File.exist?(DIRECTORY)
 
+  DNEW = ".new"
+
   BASE = BaseConvert.new(:hexadecimal,:word)
 
   def self.xor_cypher(key,cypher)
@@ -53,8 +55,27 @@ class ROTP
     GStore::Client.new( :access_key => akey0, :secret_key => skey0, )
   end
 
+  NOT_AVAILABLE = "not available"
+
+  def self.check_backup(backup0)
+    if File.exist?( backup0 ) then
+      # This would clearly be a mistake by the usesr.
+      raise "#{backup0} is not a file" if !File.file?(backup0)
+      raise "#{backup0} is not writable" if !File.writable?(backup0)
+    end
+    dirname = File.dirname(backup0)
+    # Might be possible to continue with some funtionality
+    raise NOT_AVAILABLE if !File.exist?(dirname)
+    # Again, this would clearly be a mistake by the usesr
+    raise "#{backup0} directory is not writable" if !File.writable?(dirname)
+  end
+
   def set_backup( backup0 )
-    $stderr.puts "Warning: #{backup0} not available"  if !File.exist?(backup0)
+    begin
+      ROTP.check_backup(backup0)
+    rescue Exception
+      raise $! unless $!.message == NOT_AVAILABLE
+    end
     @backup = backup0
   end
 
@@ -138,11 +159,21 @@ class ROTP
     key0 = ROTP.rndstr
     key1 = ROTP.xor_cypher(pin,key0)
     cypher = Crypt::XXTEA.encrypt(key1,password0)
+    # What happens here is if the copy to backup fails,
+    # the OTP does not regenerate, but remains effective.
+    File.open( @backup+DNEW, 'w', 0600 ){|fh| fh.print cypher} if @backup
     client.put_object(@bucket, cypherpad, :data => cypher)
     File.open(keypad,'w',0600){|fh| fh.print key0 }
+    # Now that we know the OTP regenerated,
+    # the backup finishes it's transaction.
+    File.rename( @backup+DNEW, @backup ) if @backup
+    # Not completely failsafe, but
+    # keypad is very unlikely to fail.
   end
 
   def initialize_pad( akey0, skey0, password0 )
+    # Need to ensure initiation can write to backup
+    ROTP.check_backup(@backup) if @backup
     initialize_client(akey0,skey0)
     reset_password(password0)
   end
