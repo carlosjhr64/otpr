@@ -41,9 +41,16 @@ class ROTP
     0.upto(n-1).inject(''){|k,c| k+(rand(256)).chr }
   end
 
+  def self.valid_password(password0)
+    raise "password too short" unless password0.length >= MINLENGTH
+  end
+
+  def self.valid_pin(pin0)
+    pin0.length == PINLENGTH
+  end
+
   def self.validate(password0)
-    length = password0.length
-    raise 'password too short!' unless (length == PINLENGTH) || (length >= MINLENGTH)
+    ROTP.valid_pin(password0) || ROTP.valid_password(password0)
   end
 
   def self.client(akey0,skey0)
@@ -124,19 +131,23 @@ class ROTP
   def init(akey0,skey0,strict=false)
     raise 'unexpected access key length' unless akey0.length == 20
     raise 'unexpected secret key length' unless skey0.length == 40
-    raise "can't get bucket" if strict && !ROTP.client(akey0,skey0).list_buckets.include?(bucket)
+    if strict then
+      namex = Regexp.new("<Name>#{@bucket}</Name>")
+      raise "can't get bucket" unless (ROTP.client(akey0,skey0).list_buckets =~ namex)
+    end
     dir0 = bucketdir
     Dir.mkdir(dir0, 0700) if !File.exist?(dir0)
     File.open(akeypad,'w',0600){|fh| fh.print Crypt::XXTEA.encrypt(cryptkey,akey0) }
     File.open(skeypad,'w',0600){|fh| fh.print Crypt::XXTEA.encrypt(cryptkey,skey0) }
+    @akey, @skey = akey0, skey0
   end
 
   def akey
-    Crypt::XXTEA.decrypt(cryptkey, File.read(akeypad))
+    @akey ||= Crypt::XXTEA.decrypt(cryptkey, File.read(akeypad))
   end
 
   def skey
-    Crypt::XXTEA.decrypt(cryptkey, File.read(skeypad))
+    @skey ||= Crypt::XXTEA.decrypt(cryptkey, File.read(skeypad))
   end
 
   def client
@@ -144,7 +155,7 @@ class ROTP
   end
 
   def reset(password0=@password)
-    ROTP.validate( password0 )
+    ROTP.valid_password( password0 )
     key0 = ROTP.rndstr
     key1 = ROTP.xor_cypher(pin,key0)
     cypher = Crypt::XXTEA.encrypt(key1,password0)
