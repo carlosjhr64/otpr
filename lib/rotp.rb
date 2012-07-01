@@ -42,34 +42,20 @@ class ROTP
   end
 
   def self.valid_password(password0)
-    raise "password too short" unless password0.length >= MINLENGTH
+    raise "password must be at least #{MINLENGTH} characters" unless password0.length >= MINLENGTH
   end
 
   def self.valid_pin(pin0)
-    pin0.length == PINLENGTH
-  end
-
-  def self.validate(password0)
-    ROTP.valid_pin(password0) || ROTP.valid_password(password0)
+    raise "pin must have #{PINLENGTH} characters" unless pin0.length == PINLENGTH
   end
 
   def self.client(akey0,skey0)
     GStore::Client.new( :access_key => akey0, :secret_key => skey0, )
   end
 
-  def set_backup( backup0, strict=false, quiet=false )
-    if backup0 then
-      if !File.exist?(backup0) then
-        raise "backup not available" if strict
-        $stderr.puts "Warning: backup not available" unless quiet
-      end
-    end
+  def set_backup( backup0 )
+    $stderr.puts "Warning: #{backup0} not available"  if !File.exist?(backup0)
     @backup = backup0
-  end
-
-  def set_password( password0 )
-    ROTP.validate( password0 )
-    @password = password0
   end
 
   def set_padname( padname0 )
@@ -79,15 +65,14 @@ class ROTP
 
   def set_bucket( bucket0 )
     raise "bad bucket name" unless bucket0 =~ /^\w+$/
-    @bucket	= bucket0
+    @bucket = bucket0
   end
 
   attr_reader	:backup, :bucket, :padname, :password
-  def initialize(bucket0,padname0,password0,backup0=nil,strict=false,quiet=false)
+  def initialize(bucket0,padname0,backup0=nil)
     set_bucket( bucket0 )
     set_padname( padname0 )
-    set_password( password0 )
-    set_backup( backup0, strict, quiet )
+    set_backup( backup0 ) if backup0
   end
 
   def salt
@@ -124,17 +109,11 @@ class ROTP
     "#{padid}.pad"
   end
 
-  def pin
-    @password[0..(PINLENGTH-1)]
-  end
-
-  def init(akey0,skey0,strict=false)
+  def initialize_client(akey0,skey0)
     raise 'unexpected access key length' unless akey0.length == 20
     raise 'unexpected secret key length' unless skey0.length == 40
-    if strict then
-      namex = Regexp.new("<Name>#{@bucket}</Name>")
-      raise "can't get bucket" unless (ROTP.client(akey0,skey0).list_buckets =~ namex)
-    end
+    namex = Regexp.new("<Name>#{@bucket}</Name>")
+    raise "can't get bucket" unless (ROTP.client(akey0,skey0).list_buckets =~ namex)
     dir0 = bucketdir
     Dir.mkdir(dir0, 0700) if !File.exist?(dir0)
     File.open(akeypad,'w',0600){|fh| fh.print Crypt::XXTEA.encrypt(cryptkey,akey0) }
@@ -154,13 +133,18 @@ class ROTP
     ROTP.client(akey,skey)
   end
 
-  def reset(password0=@password)
+  def reset_password(password0)
     ROTP.valid_password( password0 )
     key0 = ROTP.rndstr
     key1 = ROTP.xor_cypher(pin,key0)
     cypher = Crypt::XXTEA.encrypt(key1,password0)
     client.put_object(@bucket, cypherpad, :data => cypher)
     File.open(keypad,'w',0600){|fh| fh.print key0 }
+  end
+
+  def initialize_pad( akey0, skey0, password0 )
+    initialize_client(akey0,skey0)
+    reset_password(password0)
   end
 
   def get_password
@@ -170,10 +154,9 @@ class ROTP
     Crypt::XXTEA.decrypt(key1,cypher0)
   end
 
-  def pin_password
-    # pin_password
+  def pin_password( pin0 )
     password0 = get_password
-    raise "could not get password" unless password0[0..(PINLENGTH-1)] == pin
+    raise "could not get password" unless password0[0..(PINLENGTH-1)] == pin0
     reset(password0)
   end
 
