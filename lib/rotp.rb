@@ -46,6 +46,10 @@ class ROTP
     raise 'password too short!' unless (length == PINLENGTH) || (length >= MINLENGTH)
   end
 
+  def self.client(akey0,skey0)
+    GStore::Client.new( :access_key => akey0, :secret_key => skey0, )
+  end
+
   def set_backup( backup0, strict=false, quiet=false )
     if backup0 then
       if !File.exist?(backup0) then
@@ -117,14 +121,12 @@ class ROTP
     @password[0..(PINLENGTH-1)]
   end
 
-  def init(akey0,skey0)
-    raise 'need the actual password (not the pin) to init.' unless @password.length > MINLENGTH
+  def init(akey0,skey0,strict=false)
     raise 'unexpected access key length' unless akey0.length == 20
     raise 'unexpected secret key length' unless skey0.length == 40
+    raise "can't get bucket" if strict && !ROTP.client(akey0,skey0).list_buckets.include?(bucket)
     dir0 = bucketdir
     Dir.mkdir(dir0, 0700) if !File.exist?(dir0)
-    # @bucket is not really a secret, but
-    # if anybody somehow got to read this directory let's make it hard.
     File.open(akeypad,'w',0600){|fh| fh.print Crypt::XXTEA.encrypt(cryptkey,akey0) }
     File.open(skeypad,'w',0600){|fh| fh.print Crypt::XXTEA.encrypt(cryptkey,skey0) }
   end
@@ -138,7 +140,7 @@ class ROTP
   end
 
   def client
-    GStore::Client.new( :access_key => akey, :secret_key => skey, )
+    ROTP.client(akey,skey)
   end
 
   def reset(password0=@password)
