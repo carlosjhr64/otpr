@@ -1,0 +1,84 @@
+To use rotp, you have to have a Google Cloud Storage service:
+
+	https://developers.google.com/storage/docs/getting-started
+
+Before initiating your one time pass pad,
+you should have the following information:
+
+	* The name of an existing google store bucket to put your pad in.
+	* The name of your pad.
+	* Optionally, the name of a backup file in removable media (USB stick, SD Card, etc.).
+	* The access key to your google cloud storage.
+	* The secret key to your google cloud storage.
+	* The master password you want to save.
+
+Your intialization run will look something like the following:
+
+	$ rotp --init TheBucketName ThePadName /media/1234-4567/cipher.pad
+	Access Key: 
+	YOURGOOGLEACCESSKEEY
+	Secret Key: 
+	YOURGOOGLESECRETKEYISHEEEEEEEEEEEEEEEERE
+	Password: 
+	SuperSecretMasterPasswordVeryLongAndStoredInFireSafe
+	SuperSecretMasterPasswordVeryLongAndStoredInFireSafe
+
+You tell rotp that you're initiating a pad with the --init option.
+
+I recommend you use the optional backup.
+But either way be consistent.
+If you specify a backup and it's not there at the time of regenearation,
+regenaration will be skipped, keeping the backup valid for when it is available.
+(So in that case, it would not be a one time pass.)
+The backup is assumed to be the fast read and will be read instead of google storage.
+If backup is unavalable or not given, google storage will be read.
+Writes in regenaration are always done to google storage, and to backup if given.
+Again, if a backup is given but is unavailable, regeneration is skipped.
+
+So initialization is a really important step.
+If a backup is given but unavailable,
+the initialization will tell you and fail.
+
+The advantage of having a backup is that you'll have your master password even if you're offline.
+If you loose your backup media, you'll still be fine because
+you can get your master password from google storage.
+
+You get back your master password this way:
+
+	rotp  ThePadName /media/1234-5678/cipher.pad
+	Pin: 
+	Sup
+	SuperSecretMasterPasswordVeryLongAndStoredInFireSafe
+
+All you have to remember is the first three charaters of your master password,
+which is like a "pin number".  The first three letters of your master password is your pin.
+
+You can change your master password:
+
+	rotp --new TheBucketName ThePadName /media/1234-5678/cipher.pad
+	Password: 
+	AnotherVeryLongRidculouslyLongPasswordSavedInFireSafe
+	AnotherVeryLongRidculouslyLongPasswordSavedInFireSafe
+
+The --new option tells rotp the store a new password.
+And check that's there:
+
+	rotp TheBucketName ThePadName /media/1234-5677/cipher.pad
+	Pin: 
+	Ano
+	AnotherVeryLongRidculouslyLongPasswordSavedInFireSafe
+
+Here's what happens on a bad pin:
+
+	ruby -I ./lib ./bin/rotp TheBucketName ThePadName /media/1234-56778/cipher.pad
+	Pin: 
+	NOP
+	could not get password
+
+The key files are stored in:
+	~/.rotp
+It's security is based primarily on the file system permissions, set to readable by the user only.
+It contains your google access/secret keys.
+The files are encrypted using your bucket name and pad name to create the encription key,
+obfuscating attempts to get your google access keys (but not impossible...
+if you have someone this far in your computer, you've got problems no matter what!).

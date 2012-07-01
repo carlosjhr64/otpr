@@ -189,6 +189,7 @@ class ROTP
     File.rename( @backup+DNEW, @backup ) if @backup
     # Not completely failsafe, but
     # keypad is very unlikely to fail.
+    return password0
   end
 
   def initialize_pad( akey0, skey0, password0 )
