@@ -60,17 +60,17 @@ You can change your master password:
 	AnotherVeryLongRidculouslyLongPasswordSavedInFireSafe
 	AnotherVeryLongRidculouslyLongPasswordSavedInFireSafe
 
-The --new option tells rotp the store a new password.
+The --new option tells rotp to store a new password.
 And check that's there:
 
-	rotp TheBucketName ThePadName /media/1234-5677/cipher.pad
+	rotp TheBucketName ThePadName /media/1234-5678/cipher.pad
 	Pin: 
 	Ano
 	AnotherVeryLongRidculouslyLongPasswordSavedInFireSafe
 
 Here's what happens on a bad pin:
 
-	ruby -I ./lib ./bin/rotp TheBucketName ThePadName /media/1234-56778/cipher.pad
+	rotp TheBucketName ThePadName /media/1234-56778/cipher.pad
 	Pin: 
 	NOP
 	could not get password
