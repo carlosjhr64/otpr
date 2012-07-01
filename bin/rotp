@@ -70,7 +70,7 @@ begin
   when /i/ # initialize
     password = rotc.initialize_pad( ask( "Access Key: " ), ask( "Secret Key: " ), ask( "Password: " ) )
   when /n/ # new password
-    password = rotc.reset_password( ask( "Password: " ) )
+    password = rotc.new_password( ask( "Password: " ) )
   else
     password = rotc.pin_password( ask( "Pin: " ) )
   end

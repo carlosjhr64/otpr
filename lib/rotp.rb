@@ -192,6 +192,11 @@ class ROTP
     return password0
   end
 
+  def new_password(password0)
+    ROTP.check_backup(@backup) if @backup
+    reset_password(password0)
+  end
+
   def initialize_pad( akey0, skey0, password0 )
     # Need to ensure initiation can write to backup
     ROTP.check_backup(@backup) if @backup

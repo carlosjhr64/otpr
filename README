@@ -1,3 +1,10 @@
+INSTALL:
+
+	not availble on rubygems yet
+
+
+USAGE:
+
 To use rotp, you have to have a Google Cloud Storage service:
 
 	https://developers.google.com/storage/docs/getting-started
@@ -82,3 +89,10 @@ It contains your google access/secret keys.
 The files are encrypted using your bucket name and pad name to create the encription key,
 obfuscating attempts to get your google access keys (but not impossible...
 if you have someone this far in your computer, you've got problems no matter what!).
+
+
+REQUIRES:
+
+	gem 'crypt-tea','= 1.3.0'
+	gem 'base_convert'
+	gem 'gstore','= 0.2.1'
