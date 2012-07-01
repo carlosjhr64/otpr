@@ -80,15 +80,15 @@ class ROTP
   end
 
   def salt
-    @bucket+@padname
+    File.join(@bucket,@padname)
   end
 
-  def salted
+  def cryptkey
     Digest::MD5.digest(salt)
   end
 
   def padid
-    ROTP.digest(salt)
+    ROTP.digest(cryptkey)
   end
 
   def bucketdir
@@ -125,16 +125,16 @@ class ROTP
     Dir.mkdir(dir0, 0700) if !File.exist?(dir0)
     # @bucket is not really a secret, but
     # if anybody somehow got to read this directory let's make it hard.
-    File.open(akeypad,'w',0600){|fh| fh.print Crypt::XXTEA.encrypt(salted,akey0) }
-    File.open(skeypad,'w',0600){|fh| fh.print Crypt::XXTEA.encrypt(salted,skey0) }
+    File.open(akeypad,'w',0600){|fh| fh.print Crypt::XXTEA.encrypt(cryptkey,akey0) }
+    File.open(skeypad,'w',0600){|fh| fh.print Crypt::XXTEA.encrypt(cryptkey,skey0) }
   end
 
   def akey
-    Crypt::XXTEA.decrypt(salted, File.read(akeypad))
+    Crypt::XXTEA.decrypt(cryptkey, File.read(akeypad))
   end
 
   def skey
-    Crypt::XXTEA.decrypt(salted, File.read(skeypad))
+    Crypt::XXTEA.decrypt(cryptkey, File.read(skeypad))
   end
 
   def client
