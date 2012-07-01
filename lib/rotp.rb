@@ -26,21 +26,21 @@ class ROTP
 
   BASE = BaseConvert.new(:hexadecimal,:word)
 
-  def self.xor_cypher(key,cypher)
+  def self.xor_cipher(key,cipher)
     password = ''
-    cypher = cypher.bytes.inject([],:push)
+    cipher = cipher.bytes.inject([],:push)
     key = key.bytes.inject([],:push)
     ksize = key.length
-    cypher.length.times {|n| password += (cypher[n] ^ key[n.modulo ksize]).chr }
+    cipher.length.times {|n| password += (cipher[n] ^ key[n.modulo ksize]).chr }
     return password
-  end
-
-  def self.digest(string)
-    BASE.convert(Digest::MD5.hexdigest(string))
   end
 
   def self.rndstr(n=16)
     0.upto(n-1).inject(''){|k,c| k+(rand(256)).chr }
+  end
+
+  def self.digest(string)
+    BASE.convert(Digest::MD5.hexdigest(string))
   end
 
   def self.valid_password(password0)
@@ -49,6 +49,11 @@ class ROTP
 
   def self.valid_pin(pin0)
     raise "pin must have #{PINLENGTH} characters" unless pin0.length == PINLENGTH
+  end
+
+  def self.valid_keys(akey0,skey0)
+    raise 'unexpected access key length' unless akey0.length == 20
+    raise 'unexpected secret key length' unless skey0.length == 40
   end
 
   def self.client(akey0,skey0)
@@ -126,20 +131,35 @@ class ROTP
     File.join(bucketdir,"skey.pad") # secret key
   end
 
-  def cypherpad
+  def cipherpad
     "#{padid}.pad"
   end
 
-  def initialize_client(akey0,skey0)
-    raise 'unexpected access key length' unless akey0.length == 20
-    raise 'unexpected secret key length' unless skey0.length == 40
-    namex = Regexp.new("<Name>#{@bucket}</Name>")
-    raise "can't get bucket" unless (ROTP.client(akey0,skey0).list_buckets =~ namex)
+  def save_akey(akey0)
+    File.open(akeypad,'w',0600){|fh| fh.print Crypt::XXTEA.encrypt(cryptkey,akey0) }
+  end
+
+  def save_skey(skey0)
+    File.open(skeypad,'w',0600){|fh| fh.print Crypt::XXTEA.encrypt(cryptkey,skey0) }
+  end
+
+  def mkbucketdir
     dir0 = bucketdir
     Dir.mkdir(dir0, 0700) if !File.exist?(dir0)
-    File.open(akeypad,'w',0600){|fh| fh.print Crypt::XXTEA.encrypt(cryptkey,akey0) }
-    File.open(skeypad,'w',0600){|fh| fh.print Crypt::XXTEA.encrypt(cryptkey,skey0) }
+  end
+
+  def set_keys(akey0,skey0)
+    mkbucketdir
+    save_akey(akey0)
+    save_skey(skey0)
     @akey, @skey = akey0, skey0
+  end
+
+  def initialize_client(akey0,skey0)
+    ROTP.valid_keys(akey0,skey0)
+    namex = Regexp.new("<Name>#{@bucket}</Name>")
+    raise "can't get bucket" unless (ROTP.client(akey0,skey0).list_buckets =~ namex)
+    set_keys(akey0,skey0)
   end
 
   def akey
@@ -157,12 +177,12 @@ class ROTP
   def reset_password(password0)
     ROTP.valid_password( password0 )
     key0 = ROTP.rndstr
-    key1 = ROTP.xor_cypher(pin,key0)
-    cypher = Crypt::XXTEA.encrypt(key1,password0)
+    key1 = ROTP.xor_cipher(pin,key0)
+    cipher = Crypt::XXTEA.encrypt(key1,password0)
     # What happens here is if the copy to backup fails,
     # the OTP does not regenerate, but remains effective.
-    File.open( @backup+DNEW, 'w', 0600 ){|fh| fh.print cypher} if @backup
-    client.put_object(@bucket, cypherpad, :data => cypher)
+    File.open( @backup+DNEW, 'w', 0600 ){|fh| fh.print cipher} if @backup
+    client.put_object(@bucket, cipherpad, :data => cipher)
     File.open(keypad,'w',0600){|fh| fh.print key0 }
     # Now that we know the OTP regenerated,
     # the backup finishes it's transaction.
@@ -179,10 +199,10 @@ class ROTP
   end
 
   def get_password
-    cypher0 = client.get_object(@bucket,cypherpad)
+    cipher0 = client.get_object(@bucket,cipherpad)
     key0 = File.read(keypad)
-    key1 = ROTP.xor_cypher(pin,key0)
-    Crypt::XXTEA.decrypt(key1,cypher0)
+    key1 = ROTP.xor_cipher(pin,key0)
+    Crypt::XXTEA.decrypt(key1,cipher0)
   end
 
   def pin_password( pin0 )
