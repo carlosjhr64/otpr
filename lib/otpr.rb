@@ -219,7 +219,13 @@ class OTPR
     OTPR.valid_pin(pin0)
     password0 = get_password( pin0 )
     raise "could not get password" unless password0[0..(PINLENGTH-1)] == pin0
-    reset_password(password0)
+    begin
+      # Reset might fail
+      reset_password(password0)
+    rescue Exception
+      $stderr.puts $!
+      # in any case, we have our password
+    end
     return password0
   end
 

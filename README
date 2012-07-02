@@ -1,6 +1,6 @@
 INSTALL:
 
-	not availble on rubygems yet
+	gem install otpr
 
 
 USAGE:
