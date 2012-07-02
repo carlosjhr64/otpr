@@ -3,11 +3,12 @@ version = '0.1.1'
 help = <<EOT
 Usage:	otpr bucket pad-name [backup]
 Options:
-	-v --version
-	-h		short help
-	--help		long help
-	-i --init	initialize your pad
-	-n --new	reset you password
+	-v	--version
+	-h			short help
+	--help			long help
+	-i	--init		initialize your pad
+	-n	--new		reset you password
+	-u	--unavailable	don't regenerate
 EOT
 more = <<EOT
 GitHub page:
@@ -27,6 +28,7 @@ begin
   MAP['--new']		= 'n'
   MAP['--version']	= 'v'
   MAP['--help']		= 'H'
+  MAP['--unavailable']	= 'u'
   # GET THE OPTIONS
   options = ARGV.select{|a| a=~/^-/}.map{|a| MAP[a]}.join
   ARGV.delete_if{|a| a=~/^-/}
@@ -45,7 +47,8 @@ rescue Exception
 ensure
   if options=~/[vh]/i then
     io = (exit_status==0)? $stdout : $stderr # If this an error, then use stderr.
-    io.puts (options=~/v/i)? version : help
+    a = (options=~/v/i)? version : help
+    io.puts a
     io.puts more if options=~/H/
     exit exit_status
   end
@@ -68,7 +71,8 @@ begin
   when /n/ # new password
     password = rotc.new_password( ask( "Password: " ) )
   else
-    password = rotc.pin_password( ask( "Pin: " ) )
+                                                  # regenerate?
+    password = rotc.pin_password( ask( "Pin: " ), (options=~/u/)? false : true )
   end
   puts password
 rescue Exception

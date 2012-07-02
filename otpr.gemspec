@@ -16,5 +16,6 @@ Gem::Specification.new do |s|
   s.executables	<< "otpr"
   s.add_runtime_dependency "crypt-tea", ["= 1.3.0"]
   s.add_runtime_dependency "gstore", ["= 0.2.1"]
+  s.add_runtime_dependency "base_convert"
   s.homepage    = 'https://github.com/carlosjhr64/otpr'
 end

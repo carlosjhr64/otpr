@@ -65,7 +65,7 @@ class OTPR
   end
 
   def self.client(akey0,skey0)
-    GStore::Client.new( :access_key => akey0, :secret_key => skey0, )
+    GStore::Client.new( :access_key => akey0, :secret_key => skey0 )
   end
 
   def self.valid_bucket(akey0,skey0,bucket0)
@@ -229,16 +229,18 @@ class OTPR
     Crypt::XXTEA.decrypt(key1,cipher0)
   end
 
-  def pin_password( pin0 )
+  def pin_password( pin0, regenerate=true )
     OTPR.valid_pin(pin0)
     password0 = get_password( pin0 )
     raise "could not get password" unless password0[0..(PINLENGTH-1)] == pin0
-    begin
-      # Reset might fail
-      reset_password(password0)
-    rescue Exception
-      $stderr.puts $!
-      # in any case, we have our password
+    if regenerate then
+      begin
+        # Reset might fail
+        reset_password(password0)
+      rescue Exception
+        $stderr.puts $!
+        # in any case, we have our password
+      end
     end
     return password0
   end
