@@ -6,7 +6,7 @@ run = 'ruby -I ./lib ./bin/otpr'
 puts "Version(-v):"
 puts (out = `#{run} -v`)
 puts (dg = Digest::MD5.hexdigest(out))
-puts (dg=='1347633cdf7cdcb2168d61093630d5ae')? "OK" : (errors+=1) && "BAD"
+puts (dg=='776f5cac6cd7a8946085001e4f5661cf')? "OK" : (errors+=1) && "BAD"
 puts
 puts
 puts "Help(-h):"

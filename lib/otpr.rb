@@ -33,8 +33,18 @@ class OTPR
     return password
   end
 
-  def self.rndstr(n=16)
-    0.upto(n-1).inject(''){|k,c| k+(rand(256)).chr }
+  begin
+    # use this version if available
+    require 'securerandom'
+    def self.rndstr(n=16)
+      SecureRandom.random_bytes(n)
+    end
+  rescue Exception
+    $stderr.puts $!
+    $stderr.puts "using rand..."
+    def self.rndstr(n=16)
+      0.upto(n-1).inject(''){|k,c| k+(rand(256)).chr }
+    end
   end
 
   def self.digest(string)
