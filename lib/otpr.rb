@@ -58,6 +58,11 @@ class OTPR
     GStore::Client.new( :access_key => akey0, :secret_key => skey0, )
   end
 
+  def self.valid_bucket(akey0,skey0,bucket0)
+    namex = Regexp.new("Name\\W+#{bucket0}\\W+Name")
+    raise "can't get bucket" unless (OTPR.client(akey0,skey0).list_buckets =~ namex)
+  end
+
   NOT_AVAILABLE = "not available"
 
   def self.check_backup(backup0)
@@ -155,8 +160,7 @@ class OTPR
 
   def initialize_client(akey0,skey0)
     OTPR.valid_keys(akey0,skey0)
-    namex = Regexp.new("<Name>#{@bucket}</Name>")
-    raise "can't get bucket" unless (OTPR.client(akey0,skey0).list_buckets =~ namex)
+    OTPR.valid_bucket(akey0,skey0)
     set_keys(akey0,skey0)
   end
 
