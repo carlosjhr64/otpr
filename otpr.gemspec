@@ -12,7 +12,9 @@ Gem::Specification.new do |s|
   s.description = "Store your master password in google cloud storage."
   s.authors     = ["Carlos Hernandez"]
   s.email       = 'carlosjhr64@gmail.com'
-  s.files       = ["lib/otpr.rb"]
+  s.files       = ["lib/otpr.rb","README"]
   s.executables	<< "otpr"
+  s.add_runtime_dependency "crypt-tea", ["= 1.3.0"]
+  s.add_runtime_dependency "gstore", ["= 0.2.1"]
   s.homepage    = 'https://github.com/carlosjhr64/otpr'
 end

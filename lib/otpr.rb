@@ -1,16 +1,14 @@
 # REQUIRED LIBRARIES
 require 'digest/md5'
-gem 'crypt-tea','= 1.3.0'
 begin
-  require 'crypt_tea'
+  require 'crypt_tea' # gem 'crypt-tea','= 1.3.0'
 rescue Exception
   # above is what works, but documentation shows this...
   require 'crypt-tea'
 end
 require 'base_convert'
 require 'kconv'
-gem 'gstore','= 0.2.1'
-require 'gstore'
+require 'gstore' # gem 'gstore','= 0.2.1'
 
 class OTPR
 
