@@ -6,19 +6,19 @@ run = 'ruby -I ./lib ./bin/otpr'
 puts "Version(-v):"
 puts (out = `#{run} -v`)
 puts (dg = Digest::MD5.hexdigest(out))
-puts (dg=='776f5cac6cd7a8946085001e4f5661cf')? "OK" : (errors+=1) && "BAD"
+puts (dg=='2e79c5454a845c0957319deb7709b006')? "OK" : (errors+=1) && "BAD"
 puts
 puts
 puts "Help(-h):"
 puts (out = `#{run} -h`)
 puts (dg = Digest::MD5.hexdigest(out))
-puts (dg=='e426b83d87a201f41dbfdfec4fdae484')? "OK" : (errors+=1) && "BAD"
+puts (dg=='d20d3290a236fa50c682871b59b01f93')? "OK" : (errors+=1) && "BAD"
 puts
 puts
 puts "Help(-H):"
 puts (out = `#{run} -H`)
 puts (dg = Digest::MD5.hexdigest(out))
-puts (dg=='313323db11d65de44eef761230116ecb')? "OK" : (errors+=1) && "BAD"
+puts (dg=='2ed194fb7f6e7e8fa1aa4b41f6ae2193')? "OK" : (errors+=1) && "BAD"
 puts
 puts
 puts "Oooops!(--caca):"
@@ -29,7 +29,7 @@ puts
 puts "Output to stderr:"
 puts (out = `cat ./temp`)
 puts (dg = Digest::MD5.hexdigest(out))
-puts (dg=='cd86e99c4fde7fbd90b2c27cb2a611fa')? "OK" : (errors+=1) && "BAD"
+puts (dg=='c8515012149fbf25411b60d40882c8c8')? "OK" : (errors+=1) && "BAD"
 puts
 if errors == 0 then
   def ask(question)
