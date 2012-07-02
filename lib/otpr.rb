@@ -160,7 +160,7 @@ class OTPR
 
   def initialize_client(akey0,skey0)
     OTPR.valid_keys(akey0,skey0)
-    OTPR.valid_bucket(akey0,skey0)
+    OTPR.valid_bucket(akey0,skey0,@bucket)
     set_keys(akey0,skey0)
   end
 
