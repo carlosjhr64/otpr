@@ -2,6 +2,11 @@ INSTALL:
 
 	gem install otpr
 
+CHANGES:
+
+	*Version 1*
+The password string length must be 64.
+The pin string length must be 7.
 
 USAGE:
 
@@ -27,8 +32,8 @@ Your intialization run will look something like the following:
 	Secret Key: 
 	YOURGOOGLESECRETKEYISHEEEEEEEEEEEEEEEERE
 	Password: 
-	SuperSecretMasterPasswordVeryLongAndStoredInFireSafe
-	SuperSecretMasterPasswordVeryLongAndStoredInFireSafe
+	SuperSecretRandomPleaseMasterPasswordVeryLongAndStoredInFireSafe
+	SuperSecretRandomPleaseMasterPasswordVeryLongAndStoredInFireSafe
 
 You tell otpr that you're initiating a pad with the --init option.
 
@@ -54,32 +59,32 @@ You get back your master password this way:
 
 	otpr  ThePadName /media/1234-5678/cipher.pad
 	Pin: 
-	Sup
-	SuperSecretMasterPasswordVeryLongAndStoredInFireSafe
+	SuperSe
+	SuperSecretRandomPleaseMasterPasswordVeryLongAndStoredInFireSafe
 
-All you have to remember is the first three charaters of your master password,
-which is like a "pin number".  The first three letters of your master password is your pin.
+All you have to remember is the first seven letters of your master password,
+which is like a "pin number".  The first seven letters of your master password is your pin.
 
 You can change your master password:
 
 	otpr --new TheBucketName ThePadName /media/1234-5678/cipher.pad
 	Password: 
-	AnotherVeryLongRidculouslyLongPasswordSavedInFireSafe
-	AnotherVeryLongRidculouslyLongPasswordSavedInFireSafe
+	Different_Random_PleaseMasterPasswordVeryLongAndStoredInFireSafe
+	Different_Random_PleaseMasterPasswordVeryLongAndStoredInFireSafe
 
 The --new option tells otpr to store a new password.
 And check that's there:
 
 	otpr TheBucketName ThePadName /media/1234-5678/cipher.pad
 	Pin: 
-	Ano
-	AnotherVeryLongRidculouslyLongPasswordSavedInFireSafe
+	Differe
+	Different_Random_PleaseMasterPasswordVeryLongAndStoredInFireSafe
 
 Here's what happens on a bad pin:
 
 	otpr TheBucketName ThePadName /media/1234-56778/cipher.pad
 	Pin: 
-	NOP
+	Nope!!!
 	could not get password
 
 The key files are stored in:
@@ -89,7 +94,6 @@ It contains your google access/secret keys.
 The files are encrypted using your bucket name and pad name to create the encription key,
 obfuscating attempts to get your google access keys (but not impossible...
 if you have someone this far in your computer, you've got problems no matter what!).
-
 
 REQUIRES:
 

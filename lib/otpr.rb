@@ -13,8 +13,8 @@ require 'gstore' # gem 'gstore','= 0.2.1'
 class OTPR
 
   # SOME CONFIGURATION
-  PINLENGTH = 3
-  MINLENGTH = 7
+  PINLENGTH = 7
+  REQLENGTH = 64
 
   # WHERE ARE YOU?
   DIRECTORY = File.expand_path('~/.otpr')
@@ -52,7 +52,7 @@ class OTPR
   end
 
   def self.valid_password(password0)
-    raise "password must be at least #{MINLENGTH} characters" unless password0.length >= MINLENGTH
+    raise "password must have #{REQLENGTH} characters" unless password0.length == REQLENGTH
   end
 
   def self.valid_pin(pin0)

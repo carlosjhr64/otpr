@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-version = '0.2.0'
+version = '1.0.0'
 help = <<EOT
 Usage:	otpr bucket pad-name [backup]
 Options:
@@ -69,10 +69,10 @@ begin
   when /i/ # initialize
     password = rotc.initialize_pad( ask( "Access Key: " ), ask( "Secret Key: " ), ask( "Password: " ) )
   when /n/ # new password
-    password = rotc.new_password( ask( "Password: " ) )
+    password = rotc.new_password( ask( "Password(64): " ) )
   else
                                                   # regenerate?
-    password = rotc.pin_password( ask( "Pin: " ), (options=~/u/)? false : true )
+    password = rotc.pin_password( ask( "Pin(7): " ), (options=~/u/)? false : true )
   end
   puts password
 rescue Exception
