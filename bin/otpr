@@ -1,7 +1,11 @@
 #!/usr/bin/env ruby
+# Standard Library
+require 'digest'
+require 'securerandom'
 # Gems
 require 'help_parser'
 require 'user_space'
+require 'base_convert'
 # This Gem
 require 'otpr'
 
@@ -19,7 +23,8 @@ Usage: #{NAME} [options]
 Options:
   -v --version
   -h --help
-  -i --init
+  -i --init      create a new master password
+  -s --set       set your own master password
   --pad='#{OTPR::CONFIG[:pad]}'
   --pin=#{OTPR::CONFIG[:pin]}
   --pwd=#{OTPR::CONFIG[:pwd]}
@@ -30,7 +35,15 @@ HELP
 begin
   OPTIONS = HELP_PARSER::HelpParser.new(OTPR::VERSION, HELP)
   [:pad, :pin, :pwd].each{|k| OPTIONS.defaults!(k, OTPR::CONFIG[k])}
-  puts OPTIONS
+  #PAD = OTPR::Otpr.new
+  if OPTIONS[:init]
+    # Lets get some entropy.
+    entropy = OTPR::Entropy.redundant
+    hexadecimal = entropy.map{|r| r.to_s(16)}.join
+    qgraph = BaseConvert.new(:hexadecimal, :qgraph).convert(hexadecimal)
+    puts qgraph
+  else
+  end
 rescue HELP_PARSER::UsageException
   puts $!.message
   exit 0
