@@ -1,0 +1,40 @@
+#!/usr/bin/env ruby
+# Gems
+require 'help_parser'
+require 'user_space'
+# This Gem
+require 'otpr'
+
+USERSPACE = USER_SPACE::UserSpace.new
+if USERSPACE.config? # file exists
+  USERSPACE.config.each{|opt, value| OTPR::CONFIG[opt.to_sym] = value}
+else
+  STDERR.puts "Writting '#{USERSPACE.config_file_name}'"
+  USERSPACE.config = OTPR::CONFIG
+end
+
+NAME = File.basename($0) # Program Name
+HELP = <<HELP
+Usage: #{NAME} [options]
+Options:
+  -v --version
+  -h --help
+  -i --init
+  --pad='#{OTPR::CONFIG[:pad]}'
+  --pin=#{OTPR::CONFIG[:pin]}
+  --pwd=#{OTPR::CONFIG[:pwd]}
+Notes:
+  Defaults can be set in #{USERSPACE.config_file_name}
+HELP
+
+begin
+  OPTIONS = HELP_PARSER::HelpParser.new(OTPR::VERSION, HELP)
+  [:pad, :pin, :pwd].each{|k| OPTIONS.defaults!(k, OTPR::CONFIG[k])}
+  puts OPTIONS
+rescue HELP_PARSER::UsageException
+  puts $!.message
+  exit 0
+rescue HELP_PARSER::UsageError
+  STDERR.puts $!.message
+  exit 64
+end
