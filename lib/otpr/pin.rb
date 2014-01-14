@@ -16,7 +16,7 @@ module OTPR
           puts conf[:pin_too_short] if length < min
           puts conf[:pin_too_long]  if length > max
         end
-        puts conf[:pin_repeat] unless pin == pin0
+        puts conf[:repeat_pin] unless pin == pin0
       end
       return pin
     end

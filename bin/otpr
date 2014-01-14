@@ -23,6 +23,13 @@ unless File.exist? SALTFILE
 end
 SALT = File.read SALTFILE
 
+def assert_equal(a, b, comment)
+  unless a == b # This is a sanity check.
+    STDERR.puts OTPR::CONFIG[comment] || comment
+    exit 76 # ProtocolError: This error really should not be possible.
+  end
+end
+
 begin
   OPTIONS = HELP_PARSER::HelpParser.new(OTPR::VERSION, OTPR::CONFIG[:help])
 
@@ -37,17 +44,22 @@ begin
     # Lets get some entropy.
     qrand = OTPR::Entropy.redundant.to(:qgraph)
     otpr.set qrand
+    assert_equal(otpr.get, qrand, :could_not_set)
+    puts qrand
   elsif OPTIONS[:set]
     options = {
       :enter_pin      => OTPR::CONFIG[:enter_secret],
       :repeat_pin     => OTPR::CONFIG[:repeat_secret],
       :pin_validation => OTPR::CONFIG[:secret_validation],
-      :pin_no_valid   => OTPR::CONFIG[:secret_not_valid],
+      :pin_not_valid  => OTPR::CONFIG[:secret_not_valid],
     }
     qrand = OTPR::Pin.gets(options)
     otpr.set qrand
+    assert_equal(otpr.get, qrand, :could_not_set)
+    puts qrand
+  else
+    puts otpr.get
   end
-  puts otpr.get
 
 rescue OTPR::Error
   puts $!.message

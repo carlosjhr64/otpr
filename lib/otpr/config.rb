@@ -41,6 +41,8 @@ module OTPR
 
     :no_yin_yang => 'Pad files not found.',
 
+    :could_not_set => 'Could not set secret.',
+
     :help => <<-HELP
 Usage: otpr [options]
 Options:
@@ -56,7 +58,7 @@ Notes:
 
   module Config
     def [](k)
-      super || CONFIG[k]
+      (self.has_key?(k))? super : CONFIG[k]
     end
   end
 end
