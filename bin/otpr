@@ -65,7 +65,12 @@ begin
     assert_equal(otpr.get, qrand, :could_not_set)
     puts qrand
   else
-    puts otpr.get
+    qrand = otpr.get
+    puts qrand
+    if OPTIONS[:regen]
+      otpr.set(qrand)
+      assert_equal(otpr.get, qrand, :could_not_set)
+    end
   end
 
 rescue OTPR::Error
