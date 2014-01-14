@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+# Standard Libraries
+require 'digest'
 # Gems
 require 'help_parser'
 require 'user_space'
@@ -10,37 +12,49 @@ USERSPACE = USER_SPACE::UserSpace.new
 if USERSPACE.config? # file exists
   USERSPACE.config.each{|opt, value| OTPR::CONFIG[opt.to_sym] = value}
 else
-  STDERR.puts "Writting '#{USERSPACE.config_file_name}'"
+  STDERR.puts OTPR::CONFIG[:writting] + USERSPACE.config_file_name
   USERSPACE.config = OTPR::CONFIG
 end
 
-NAME = File.basename($0) # Program Name
-HELP = <<HELP
-Usage: #{NAME} [options]
-Options:
-  -v --version
-  -h --help
-  -i --init      create a new master password
-  -s --set       set your own master password
-  --pad='#{OTPR::CONFIG[:pad]}'
-Notes:
-  Defaults can be set in #{USERSPACE.config_file_name}
-HELP
+SALTFILE = File.join USERSPACE.cachedir, 'salt'
+unless File.exist? SALTFILE
+  STDERR.puts OTPR::CONFIG[:writting] + SALTFILE
+  File.open(SALTFILE, 'w', 0600){|f| f.write OTPR::Entropy.computer.to(:qgraph)}
+end
+SALT = File.read SALTFILE
 
 begin
-  OPTIONS = HELP_PARSER::HelpParser.new(OTPR::VERSION, HELP)
-  OPTIONS.defaults!(:pin, OTPR::CONFIG[:pin])
-  #PAD = OTPR::Otpr.new
+  OPTIONS = HELP_PARSER::HelpParser.new(OTPR::VERSION, OTPR::CONFIG[:help])
+
+  MEDIA = OPTIONS[:media, OTPR::CONFIG[:media]]
+  OTPR::Error.raise(:media_not_found) unless File.exist? MEDIA
+
+  pin        = OTPR::Pin.gets
+  passphrase = SALT+pin
+  otpr       = OTPR::Otpr.new(passphrase, USERSPACE.cachedir, MEDIA)
+
   if OPTIONS[:init]
     # Lets get some entropy.
-    entropy = OTPR::Entropy.redundant
-    hexadecimal = entropy.map{|r| r.to_s(16)}.join
-    qgraph = BaseConvert.new(:hexadecimal, :qgraph).convert(hexadecimal)
-    puts qgraph
-    pin = OTPR::Pin.gets
-    puts pin
-  else
+    qrand = OTPR::Entropy.redundant.to(:qgraph)
+    otpr.set qrand
+  elsif OPTIONS[:set]
+    options = {
+      :enter_pin      => OTPR::CONFIG[:enter_secret],
+      :repeat_pin     => OTPR::CONFIG[:repeat_secret],
+      :pin_validation => OTPR::CONFIG[:secret_validation],
+      :pin_no_valid   => OTPR::CONFIG[:secret_not_valid],
+    }
+    qrand = OTPR::Pin.gets(options)
+    otpr.set qrand
   end
+  puts otpr.get
+
+rescue OTPR::Error
+  puts $!.message
+  # Most likely a user fixable failure.
+  # Maybe the user forgot to insert the media.
+  # So categorized here as a TempFail.
+  exit 75
 rescue HELP_PARSER::UsageException
   puts $!.message
   exit 0
