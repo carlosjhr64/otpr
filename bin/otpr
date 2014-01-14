@@ -1,7 +1,4 @@
 #!/usr/bin/env ruby
-# Standard Library
-require 'digest'
-require 'securerandom'
 # Gems
 require 'help_parser'
 require 'user_space'
@@ -26,15 +23,13 @@ Options:
   -i --init      create a new master password
   -s --set       set your own master password
   --pad='#{OTPR::CONFIG[:pad]}'
-  --pin=#{OTPR::CONFIG[:pin]}
-  --pwd=#{OTPR::CONFIG[:pwd]}
 Notes:
   Defaults can be set in #{USERSPACE.config_file_name}
 HELP
 
 begin
   OPTIONS = HELP_PARSER::HelpParser.new(OTPR::VERSION, HELP)
-  [:pad, :pin, :pwd].each{|k| OPTIONS.defaults!(k, OTPR::CONFIG[k])}
+  OPTIONS.defaults!(:pin, OTPR::CONFIG[:pin])
   #PAD = OTPR::Otpr.new
   if OPTIONS[:init]
     # Lets get some entropy.
@@ -42,6 +37,8 @@ begin
     hexadecimal = entropy.map{|r| r.to_s(16)}.join
     qgraph = BaseConvert.new(:hexadecimal, :qgraph).convert(hexadecimal)
     puts qgraph
+    pin = OTPR::Pin.gets
+    puts pin
   else
   end
 rescue HELP_PARSER::UsageException
