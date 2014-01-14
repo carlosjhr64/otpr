@@ -12,6 +12,8 @@ module OTPR
   CONFIG = {
     :writting => 'Writting ',
 
+    :clear => false,
+
     :media => '/media/KINGSTON/',
     :media_not_found => 'Pad directories not found.',
 
@@ -48,8 +50,11 @@ Usage: otpr [options]
 Options:
   -v --version
   -h --help
-  -i --init      create a new master password
-  -s --set       set your own master password
+  -i --init   create a new master password
+  -s --set    set your own master password
+  -b --batch  turns off interative mode
+  -c --clear  clears screen after pin entries
+  -r --regen  regenerates pads
   --media='/removable-media-directory/'
 Notes:
   Defaults can be set in ~/.config/otpr/config.json

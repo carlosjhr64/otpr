@@ -36,13 +36,19 @@ begin
   MEDIA = OPTIONS[:media, OTPR::CONFIG[:media]]
   OTPR::Error.raise(:media_not_found) unless File.exist? MEDIA
 
-  pin        = OTPR::Pin.gets
+  CLEAR = OPTIONS[:clear, OTPR::CONFIG[:clear], true]
+
+  pin        = (OPTIONS[:batch])? STDIN.gets.strip : OTPR::Pin.gets
+  system('clear') if CLEAR
   passphrase = SALT+pin
   otpr       = OTPR::Otpr.new(passphrase, USERSPACE.cachedir, MEDIA)
 
   if OPTIONS[:init]
     # Lets get some entropy.
-    qrand = OTPR::Entropy.redundant.to(:qgraph)
+    qrand = (OPTIONS[:batch])?
+      OTPR::Entropy.computer.to(:qgraph) :
+      OTPR::Entropy.redundant.to(:qgraph)
+    system('clear') if CLEAR
     otpr.set qrand
     assert_equal(otpr.get, qrand, :could_not_set)
     puts qrand
@@ -53,7 +59,8 @@ begin
       :pin_validation => OTPR::CONFIG[:secret_validation],
       :pin_not_valid  => OTPR::CONFIG[:secret_not_valid],
     }
-    qrand = OTPR::Pin.gets(options)
+    qrand = (OPTIONS[:batch])? STDIN.gets.strip : OTPR::Pin.gets(options)
+    system(clear) if CLEAR
     otpr.set qrand
     assert_equal(otpr.get, qrand, :could_not_set)
     puts qrand
