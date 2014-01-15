@@ -88,19 +88,18 @@ begin
     if ask(OTPR::CONFIG[:confirm_erase])==OTPR::CONFIG[:y]
       Dir.glob(File.join(MEDIA_CACHE, '*')).each do |filename|
         # Don't know why there would be anything but regular file, but...
-        #File.unlink(filename) if File.file?(filename)
-        puts filename if File.file?(filename)
+        File.unlink(filename) if File.file?(filename)
+        # TODO: report on no files found.
       end
       Dir.glob(File.join(USERSPACE.cachedir, '*')).each do |filename|
         # I mean, really, why would there be anything but regular files?
-        #File.unlink(filename) if File.file?(filename)
-        puts filename if File.file?(filename)
+        File.unlink(filename) if File.file?(filename)
       end
     end
     exit
   end
 
-  otpr = OTPR::Otpr.new(SALT+get_pin, USERSPACE.cachedir, MEDIA_CACHE)
+  otpr = OTPR::Otpr.new(SALT+get_pin, MEDIA_CACHE, USERSPACE.cachedir)
 
   if OPTIONS[:create]
     OPTIONS.usage_error(:pin_exist) if otpr.exist?
