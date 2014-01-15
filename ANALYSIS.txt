@@ -1,0 +1,60 @@
+Let F[x] be one way functions of x.
+Let x*F be invertable methods on x.
+So if y=x*F, then x=y/F.
+But if y=F[x], there's no way of getting x from y.
+
+p  :: Pin: typically 3 to 7 characters.
+s  :: Salt: 256 bits (64 nibbles).
+ps :: Passphrase
+
+  ps = s+p # String concatanation
+
+x  :: Checksum of passphrase
+X  :: MD5 Digestor: creates 128 bit digests.
+
+  x = X[ps]
+
+*W :: Converts to [\w][^_] representation, suitable for filenames.
+wx :: The word representation of x.
+
+  wx = x*W = X[ps]*W = X[s+p]*W
+
+d  :: Digest of passphrase.
+D  :: SHA256 Digestor: creates 256 bit digests.
+
+  d = D[ps] = D[s+p]
+
+c  :: Secret: variable length.
+e  :: Encripted secret.
+
+  e = d^c # xor encription
+
+Note that if the size of c is comparable to d, then
+we essentially have a one time pad, unless the salt is compromised.
+With a compromised salt, e is still guarded by the pin:
+
+  e = D[s+p]^c
+
+OTPR uses the same salt for all pins.
+It is stored in a secured cache directory in the computer.
+When a user enters a pin,
+the existance of files named wx indicates we have a secret
+already stored for that pin.
+To further secure the secrets,
+we'll re-encript with random keys stored in removable media.
+
+qy :: A random graph passphrase representing about 256 bits of entropy(yin in the code).
+g  :: The re-encripted secret(yang in the code).
+
+  g = D[qy]^e = D[qy]^(D[s+p]^c)
+
+To say more about qy, consider y to be about 256 random bits.
+
+y  :: random bits
+*Q :: Converts to [:graph:][^'"] representation, suitable for passphrases.
+
+  qy = y*Q
+
+Warning:
+otpr is meant to be used to store and retrieve long passwords using short pins.
+It's not meant to be used to encript messages that are much larger than 256 bits.
