@@ -80,8 +80,8 @@ begin
   Dir.mkdir(MEDIA_CACHE, 0700) unless File.exist? MEDIA_CACHE
   assert File.directory?(MEDIA_CACHE), "Not a directory:#{MEDIA_CACHE}"
 
-  unless [:c,:r,:u,:d,:s,:erase].inject(false){|b,k| b^OPTIONS[k]}
-    OPTIONS.usage_error('Please choose exactly one action.') 
+  unless [:c,:r,:u,:d,:s,:C,:M,:erase].inject(false){|b,k| b^OPTIONS[k]}
+    OPTIONS.usage_error(:choose_one) 
   end
 
   if OPTIONS[:erase]
@@ -103,7 +103,7 @@ begin
   otpr = OTPR::Otpr.new(SALT+get_pin, USERSPACE.cachedir, MEDIA_CACHE)
 
   if OPTIONS[:create]
-    OPTIONS.usage_error('Pin exists!') if otpr.exist?
+    OPTIONS.usage_error(:pin_exist) if otpr.exist?
     secret = get_secret
     otpr.set secret
     assert_equal(otpr.get, secret, :could_not_set)
@@ -112,7 +112,7 @@ begin
   end
 
   if OPTIONS[:update]
-    OPTIONS.usage_error('Pin does not exists!') unless otpr.exist?
+    OPTIONS.usage_error(:pin_does_not_exist) unless otpr.exist?
     puts otpr.get unless OPTIONS[:batch]
     secret = get_secret
     otpr.set secret
@@ -121,8 +121,20 @@ begin
     exit
   end
 
+  if OPTIONS[:copy] or OPTIONS[:move]
+    OPTIONS.usage_error(:pin_does_not_exist) unless otpr.exist?
+    otpr2 = OTPR::Otpr.new(SALT+get_pin, USERSPACE.cachedir, MEDIA_CACHE)
+    OPTIONS.usage_error(:pin_exists) unless OPTIONS[:overwrite] or !otpr2.exist?
+    secret = otpr.get
+    otpr2.set secret
+    assert_equal(otpr2.get, secret, :could_not_set)
+    otpr.delete if OPTIONS[:move]
+    puts secret
+    exit
+  end
+
   if OPTIONS[:delete]
-    OPTIONS.usage_error('Pin does not exist!') unless otpr.exist?
+    OPTIONS.usage_error(:pin_does_not_exist) unless otpr.exist?
     confirmed = true
     unless OPTIONS[:batch]
       puts otpr.get
@@ -133,7 +145,7 @@ begin
   end
 
   if OPTIONS[:read]
-    OPTIONS.usage_error('Pin does not exists!') unless otpr.exist?
+    OPTIONS.usage_error(:pin_does_not_exist) unless otpr.exist?
     secret = otpr.get
     puts secret
     if OPTIONS[:regen]
@@ -156,7 +168,7 @@ begin
     end
   end
 
-  assert(false, 'Unexpected program flow.')
+  assert(false, :unexpected_program_flow)
 
 rescue OTPR::Error
   puts $!.message

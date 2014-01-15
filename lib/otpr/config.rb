@@ -56,18 +56,22 @@ Options:
   -h --help
 
   Actions:
-  -c --create   Create a new pin-password pair.
-  -r --read     Read a pin's password.
-  -u --update   Update a pin with a new password.
-  -d --delete   Delete a pin-password pair.
-  -s --status   Status of a pin (exists?).
-  --erase       Deletes all pins.
+  -c --create  Create a new pin-password pair.
+  -r --read    Read a pin's password.
+  -u --update  Update a pin with a new password.
+  -d --delete  Delete a pin-password pair.
+  -s --status  Status of a pin (exists?).
+  -C --copy    Copy pin content to a new pin.
+  -M --move    Move pin content to a new pin.
+  --erase      Deletes all pins.
 
   Modifiers:
-  -R --random   Create a random password.
-  -b --batch    Turns off interactive mode.
-  -C --clear    Clears screen after pin entries.
-  -g --regen    Regenerates pad.
+  -R --random     Create a random password.
+  -b --batch      Turns off interactive mode.
+  -l --clear      Clears screen after pin entries.
+  -e --echo       # TODO: Also --no-echo.
+  -g --regen      Regenerates pad.
+  -w --overwrite  Also, --no-overwrite.
 
   Where is the flash drive?:
   --media='/removable-media-directory/'
