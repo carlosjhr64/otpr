@@ -37,6 +37,10 @@ module OTPR
 
     :gibberish_prompt => 'Please randomly type at least $N words of gibberish:',
 
+    :confirm_delete => 'Delete(Y/n)?: ',
+    :confirm_erase  => 'Erase All Pins(Y/n)?: ',
+    :y => 'Y',
+
     :random_web =>
       'http://www.random.org/integers/?num=64&min=0&max=15&col=64&base=10&format=plain&rnd=new',
     :not_bucket_full => 'Did not get a full bucket.',
@@ -50,14 +54,23 @@ Usage: otpr [options]
 Options:
   -v --version
   -h --help
-  -i --init   create a new master password
-  -s --set    set your own master password
-  -b --batch  turns off interative mode
-  -c --clear  clears screen after pin entries
-  -r --regen  regenerates pads
+
+  Actions:
+  -c --create   Create a new pin-password pair.
+  -r --read     Read a pin's password.
+  -u --update   Update a pin with a new password.
+  -d --delete   Delete a pin-password pair.
+  -s --status   Status of a pin (exists?).
+  --erase       Deletes all pins.
+
+  Modifiers:
+  -R --random   Create a random password.
+  -b --batch    Turns off interactive mode.
+  -C --clear    Clears screen after pin entries.
+  -g --regen    Regenerates pad.
+
+  Where is the flash drive?:
   --media='/removable-media-directory/'
-Notes:
-  Defaults can be set in ~/.config/otpr/config.json
     HELP
   }
 

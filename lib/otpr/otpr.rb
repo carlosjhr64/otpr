@@ -13,6 +13,19 @@ module OTPR
       @zang = File.join yangdir, wcs
     end
 
+    def exist?
+      File.exist?(@zin) and File.exist?(@zang)
+    end
+
+    def inconsistent?
+      File.exist?(@zin) ^ File.exist?(@zang)
+    end
+
+    def delete
+      File.unlink(@zin)  if File.exist?(@zin)
+      File.unlink(@zang) if File.exist?(@zang)
+    end
+
     def set(plain)
       encripted = @key.xor(plain)
       yin   = OTPR::Entropy.computer.to(:qgraph)
@@ -22,9 +35,7 @@ module OTPR
     end
 
     def get
-      unless File.exist?(@zin) and File.exist?(@zang)
-        Error.raise(:no_yin_yang)
-      end
+      Error.raise(:no_yin_yang) unless exist?
       yin   = File.read @zin
       yang  = File.read @zang
       encripted = OTPR::Key.new(yin).xor(yang)
