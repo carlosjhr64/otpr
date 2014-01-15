@@ -23,11 +23,15 @@ unless File.exist? SALTFILE
 end
 SALT = File.read SALTFILE
 
-def assert_equal(a, b, comment)
-  unless a == b # This is a sanity check.
+def assert(b, comment)
+  unless b # This is a sanity check.
     STDERR.puts OTPR::CONFIG[comment] || comment
     exit 76 # ProtocolError: This error really should not be possible.
   end
+end
+
+def assert_equal(a, b, comment)
+  assert(a==b, comment)
 end
 
 begin
@@ -35,13 +39,16 @@ begin
 
   MEDIA = OPTIONS[:media, OTPR::CONFIG[:media]]
   OTPR::Error.raise(:media_not_found) unless File.exist? MEDIA
+  MEDIA_CACHE = File.join MEDIA, '.otpr'
+  Dir.mkdir(MEDIA_CACHE, 0700) unless File.exist? MEDIA_CACHE
+  assert File.directory?(MEDIA_CACHE), "Not a directory:#{MEDIA_CACHE}"
 
   CLEAR = OPTIONS[:clear, OTPR::CONFIG[:clear], true]
 
   pin        = (OPTIONS[:batch])? STDIN.gets.strip : OTPR::Pin.gets
   system('clear') if CLEAR
   passphrase = SALT+pin
-  otpr       = OTPR::Otpr.new(passphrase, USERSPACE.cachedir, MEDIA)
+  otpr       = OTPR::Otpr.new(passphrase, USERSPACE.cachedir, MEDIA_CACHE)
 
   if OPTIONS[:init]
     # Lets get some entropy.
