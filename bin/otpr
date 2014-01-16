@@ -23,36 +23,47 @@ def ask(question)
 end
 
 def system_clear
-  system(CONFIG[:clear_command]) if CLEAR
+  system(CONFIG[:clear_command]) if CONFIG[:clear]
 end
 
 def get_pin
-  pin = (OPTIONS[:batch])? STDIN.gets.strip : Pin.gets
+  pin = (CONFIG[:batch])? STDIN.gets.strip : Pin.gets
   system_clear
   return pin
 end
 
 def user_secret
-  options = {
-    :enter_pin      => CONFIG[:enter_secret],
-    :repeat_pin     => CONFIG[:repeat_secret],
-    :pin_validation => CONFIG[:secret_validation],
-    :pin_not_valid  => CONFIG[:secret_not_valid],
-  }
-  secret = (OPTIONS[:batch])?  STDIN.gets.strip : Pin.gets(options)
+  secret = nil
+  if CONFIG[:batch]
+    secret = STDIN.gets.strip
+  else
+    options = {
+      :enter_pin      => CONFIG[:enter_secret],
+      :pin_validation => CONFIG[:secret_validation],
+      :pin_min        => CONFIG[:secret_min],
+      :pin_too_short  => CONFIG[:secret_too_short],
+      :pin_max        => CONFIG[:secret_max],
+      :pin_too_long   => CONFIG[:secret_too_long],
+      :pin_accept     => CONFIG[:secret_accept],
+      :pin_reject     => CONFIG[:secret_reject],
+      :pin_not_valid  => CONFIG[:secret_not_valid],
+      :repeat_pin     => CONFIG[:repeat_secret],
+    }
+    secret = Pin.gets(options)
+  end
   system_clear
   return secret
 end
 
 def computer_random
-  return Entropy.computer.to(:qgraph) if OPTIONS[:batch]
+  return Entropy.computer.to(:qgraph) if CONFIG[:batch]
   random = Entropy.redundant.to(:qgraph)
   system_clear
   return random
 end
 
 def get_secret
-  (OPTIONS[:random])? computer_random : user_secret
+  (CONFIG[:random])? computer_random : user_secret
 end
 
 def get_salt(dir)
@@ -64,22 +75,32 @@ def get_salt(dir)
   File.read saltfile
 end
 
+def delete_files_in_dir(dir)
+  Dir.glob(File.join(dir, '*')).each do |filename|
+    # Don't know why there would be anything but regular file, but...
+    if File.file?(filename)
+      File.unlink(filename)
+    else
+      STDERR.puts "Did not delete #{filename}"
+    end
+  end
+end
+
 USERSPACE = USER_SPACE::UserSpace.new
 USERSPACE.trace = STDERR
 USERSPACE.configures(CONFIG)
 
 begin
   OPTIONS = HELP_PARSER::HelpParser.new(VERSION, CONFIG[:help])
-
   unless [:c,:r,:u,:d,:s,:C,:M,:erase].inject(false){|b,k| b^OPTIONS[k]}
     OPTIONS.usage_error(CONFIG[:choose_one]) 
   end
+  CONFIG.keys.each do |key|
+    CONFIG[key] = OPTIONS[key] unless OPTIONS[key].nil?
+  end
 
-  CLEAR = OPTIONS[:clear, CONFIG[:clear], true]
-
-  MEDIA = OPTIONS[:media, CONFIG[:media]]
-  Error.raise(:media_not_found) unless File.exist? MEDIA
-  MEDIA_CACHE = File.join MEDIA, '.otpr'
+  OTPR::Error.raise(:media_not_found) unless File.exist? CONFIG[:media]
+  MEDIA_CACHE = File.join CONFIG[:media], '.otpr'
   Dir.mkdir(MEDIA_CACHE, 0700) unless File.exist? MEDIA_CACHE
   assert File.directory?(MEDIA_CACHE), "Not a directory:#{MEDIA_CACHE}"
 
@@ -87,15 +108,11 @@ begin
 
   if OPTIONS[:erase]
     if ask(CONFIG[:confirm_erase])==CONFIG[:y]
-      Dir.glob(File.join(MEDIA_CACHE, '*')).each do |filename|
-        # Don't know why there would be anything but regular file, but...
-        File.unlink(filename) if File.file?(filename)
-        # TODO: report on no files found.
-      end
-      Dir.glob(File.join(USERSPACE.cachedir, '*')).each do |filename|
-        # I mean, really, why would there be anything but regular files?
-        File.unlink(filename) if File.file?(filename)
-      end
+      delete_files_in_dir(MEDIA_CACHE)
+      delete_files_in_dir(USERSPACE.cachedir)
+      puts CONFIG[:ok]
+    else
+      puts CONFIG[:cancelled]
     end
     exit
   end
@@ -103,7 +120,7 @@ begin
   otpr = Otpr.new(SALT+get_pin, MEDIA_CACHE, USERSPACE.cachedir)
 
   if OPTIONS[:create]
-    OPTIONS.usage_error(:pin_exist) if otpr.exist?
+    OPTIONS.usage_error(CONFIG[:pin_exist]) if otpr.exist?
     secret = get_secret
     otpr.set secret
     assert_equal(otpr.get, secret, :could_not_set)
@@ -113,7 +130,7 @@ begin
 
   if OPTIONS[:update]
     OPTIONS.usage_error(CONFIG[:pin_does_not_exist]) unless otpr.exist?
-    puts otpr.get unless OPTIONS[:batch]
+    puts otpr.get unless CONFIG[:batch]
     secret = get_secret
     otpr.set secret
     assert_equal(otpr.get, secret, :could_not_set)
@@ -124,7 +141,7 @@ begin
   if OPTIONS[:copy] or OPTIONS[:move]
     OPTIONS.usage_error(CONFIG[:pin_does_not_exist]) unless otpr.exist?
     otpr2 = Otpr.new(SALT+get_pin, USERSPACE.cachedir, MEDIA_CACHE)
-    OPTIONS.usage_error(:pin_exists) unless OPTIONS[:overwrite] or !otpr2.exist?
+    OPTIONS.usage_error(CONFIG[:pin_exists]) unless CONFIG[:overwrite] or !otpr2.exist?
     secret = otpr.get
     otpr2.set secret
     assert_equal(otpr2.get, secret, :could_not_set)
@@ -136,7 +153,7 @@ begin
   if OPTIONS[:delete]
     OPTIONS.usage_error(CONFIG[:pin_does_not_exist]) unless otpr.exist?
     confirmed = true
-    unless OPTIONS[:batch]
+    unless CONFIG[:batch]
       puts otpr.get
       confirmed = ask(CONFIG[:confirm_delete])==CONFIG[:y]
     end
@@ -148,7 +165,7 @@ begin
     OPTIONS.usage_error(CONFIG[:pin_does_not_exist]) unless otpr.exist?
     secret = otpr.get
     puts secret
-    if OPTIONS[:regen]
+    if CONFIG[:regen]
       otpr.set secret
       assert_equal(otpr.get, secret, :could_not_set)
     end
@@ -157,20 +174,20 @@ begin
 
   if OPTIONS[:status]
     if otpr.exist?
-      puts 'OK'
+      puts CONFIG[:ok]
       exit 0
     elsif otpr.inconsistent?
-      puts 'INCONSISTENT'
+      puts CONFIG[:inconsistent]
       exit 76 # Protocol error, should not be possible.
     else
-      puts 'NOT FOUND'
+      puts CONFIG[:not_found]
       exit 66 # No Input error code
     end
   end
 
   assert(false, :unexpected_program_flow)
 
-rescue Error
+rescue OTPR::Error
   puts $!.message
   # Most likely a user fixable failure.
   # Maybe the user forgot to insert the media.

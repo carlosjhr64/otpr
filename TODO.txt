@@ -1,5 +1,6 @@
 TODO:
 
+* no-echo option
 * Update README
 * write tests
 * validation in object?
