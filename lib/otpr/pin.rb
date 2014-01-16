@@ -2,15 +2,16 @@ module OTPR
   module Pin
     def self.gets(conf={})
       conf.extend Config
-      min, max = conf[:pin_min], conf[:pin_max]
       accept, reject = Regexp.new(conf[:pin_accept]), Regexp.new(conf[:pin_reject])
+      min, max = conf[:pin_min], conf[:pin_max]
       pin, pin0 = '', nil
       # Ensure user can acurately enter and repeat the pin
       until pin == pin0
         pin, pin0, length = pin0, nil, -1
         until (length >= min) and (length <= max) and (pin0 =~ accept) and !(pin0 =~ reject)
           print conf[:enter_pin]
-          pin0 = STDIN.gets.strip
+          pin0 = ((conf[:echo])? STDIN.gets : STDIN.noecho(&:gets)).strip
+          puts unless conf[:echo]
           length = pin0.length
           break unless conf[:pin_validation]
           puts conf[:pin_not_valid] if !(pin0 =~ accept) or (pin0 =~ reject)

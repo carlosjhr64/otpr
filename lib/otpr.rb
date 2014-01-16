@@ -1,6 +1,7 @@
 # Standard Libraries
 require 'open-uri'
 require 'securerandom'
+require 'io/console'
 # Gems
 require 'base_convert'
 # This Gem

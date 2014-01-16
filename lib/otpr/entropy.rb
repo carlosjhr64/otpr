@@ -32,7 +32,7 @@ module OTPR
       user = [] # Entropy from user
       while (user.length) < WORDS
         puts conf[:gibberish_prompt].gsub(/\$N/, (WORDS - user.length).to_s)
-        user += STDIN.gets.strip.split(/\s+/)
+        user += ((conf[:echo])? STDIN.gets : STDIN.noecho(&:gets)).strip.split(/\s+/)
         user.uniq!
       end
       user = DIGEST.hexdigest(user.join(' ')).chars.map{|h|h.to_i(BASE)}
