@@ -29,8 +29,8 @@ Options:
   -R --random     Create a random password.
   -b --batch      Turns off interactive mode.
   -l --clear      Clears screen after pin entries.
-  -e --echo       # TODO: Also --no-echo.
   -g --regen      Regenerates pad.
+  -e --echo --no-echo.
   -w --overwrite --no-overwrite.
 
   -P --pin-validation --no-pin-validation
