@@ -39,7 +39,7 @@ Options:
   Where is the flash drive?:
   --media='/removable-media-directory/'
 
-See `gem man otpr` for more help.
+More help: gem man otpr
     HELP
 
     # Default Options

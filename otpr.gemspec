@@ -1,21 +1,45 @@
-require 'date'
-
-version0 = `ruby -I ./lib ./bin/otpr -v`.strip
-version1 = `pwd`.strip.split(/-/).pop
-raise "Inconsistent version number, #{version0} != #{version1}" unless version0 == version1
-
 Gem::Specification.new do |s|
-  s.name        = 'otpr'
-  s.version     = version0
-  s.date        = Date.today.to_s
-  s.summary     = "Ruby One Time Pass Pad"
-  s.description = "Store your master password in google cloud storage."
-  s.authors     = ["Carlos Hernandez"]
-  s.email       = 'carlosjhr64@gmail.com'
-  s.files       = ["lib/otpr.rb","README"]
-  s.executables	<< "otpr"
-  s.add_runtime_dependency "crypt-tea", ["= 1.3.0"]
-  s.add_runtime_dependency "gstore", ["= 0.2.1"]
-  s.add_runtime_dependency "base_convert"
-  s.homepage    = 'https://github.com/carlosjhr64/otpr'
+
+  s.name     = 'otpr'
+  s.version  = '2.0.0'
+
+  s.homepage = 'https://github.com/carlosjhr64/otpr'
+
+  s.author   = 'CarlosJHR64'
+  s.email    = 'carlosjhr64@gmail.com'
+
+  s.date     = '2014-01-16'
+  s.licenses = ['MIT']
+
+  s.description = <<DESCRIPTION
+Use short pins to access your long passwords.
+DESCRIPTION
+
+  s.summary = <<SUMMARY
+Use short pins to access your long passwords.
+SUMMARY
+
+  s.extra_rdoc_files = ['README.rdoc']
+  s.rdoc_options     = ["--main", "README.rdoc"]
+
+  s.require_paths = ["lib"]
+  s.files = %w(
+ANALYSIS.txt
+README.rdoc
+TODO.txt
+bin/otpr
+config/config.json
+lib/otpr.rb
+lib/otpr/config.rb
+lib/otpr/entropy.rb
+lib/otpr/error.rb
+lib/otpr/key.rb
+lib/otpr/otpr.rb
+lib/otpr/pin.rb
+lib/otpr/version.rb
+otpr.gemspec
+  )
+  s.executables << 'otpr'
+  s.add_runtime_dependency 'base_convert', '~> 0.0', '>= 0.0.1'
+
 end
