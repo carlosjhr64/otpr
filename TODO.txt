@@ -1,2 +1,5 @@
 TODO:
 
+* Update README
+* write tests
+* validation in object?
