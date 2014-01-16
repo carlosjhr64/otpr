@@ -1,10 +1,7 @@
 #!/usr/bin/env ruby
-# Standard Libraries
-require 'digest'
 # Gems
 require 'help_parser'
 require 'user_space'
-require 'base_convert'
 # This Gem
 require 'otpr'
 
@@ -62,15 +59,12 @@ else
   USERSPACE.config = OTPR::CONFIG
 end
 
-SALTFILE = File.join USERSPACE.cachedir, 'salt'
-unless File.exist? SALTFILE
-  STDERR.puts OTPR::CONFIG[:writting] + SALTFILE
-  File.open(SALTFILE, 'w', 0600){|f| f.write OTPR::Entropy.computer.to(:qgraph)}
-end
-SALT = File.read SALTFILE
-
 begin
   OPTIONS = HELP_PARSER::HelpParser.new(OTPR::VERSION, OTPR::CONFIG[:help])
+
+  unless [:c,:r,:u,:d,:s,:C,:M,:erase].inject(false){|b,k| b^OPTIONS[k]}
+    OPTIONS.usage_error(OTPR::CONFIG[:choose_one]) 
+  end
 
   CLEAR = OPTIONS[:clear, OTPR::CONFIG[:clear], true]
 
@@ -80,9 +74,12 @@ begin
   Dir.mkdir(MEDIA_CACHE, 0700) unless File.exist? MEDIA_CACHE
   assert File.directory?(MEDIA_CACHE), "Not a directory:#{MEDIA_CACHE}"
 
-  unless [:c,:r,:u,:d,:s,:C,:M,:erase].inject(false){|b,k| b^OPTIONS[k]}
-    OPTIONS.usage_error(:choose_one) 
+  SALTFILE = File.join MEDIA_CACHE, 'salt'
+  unless File.exist? SALTFILE
+    STDERR.puts OTPR::CONFIG[:writting] + SALTFILE
+    File.open(SALTFILE, 'w', 0600){|f| f.write OTPR::Entropy.computer.to(:qgraph)}
   end
+  SALT = File.read SALTFILE
 
   if OPTIONS[:erase]
     if ask(OTPR::CONFIG[:confirm_erase])==OTPR::CONFIG[:y]

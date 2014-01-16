@@ -10,6 +10,7 @@ module OTPR
   REJECT  = /['"]/
 
   CONFIG = {
+    :choose_one => 'Choose one action.',
     :writting => 'Writting ',
 
     :clear => false,
