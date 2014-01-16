@@ -1,0 +1,28 @@
+{
+  "comment": "Here are some of the likelier configuration key-values you'll want to edit.",
+
+  "comment": "Where is your removeable media?",
+  "media": "/media/KINGSTON/",
+
+  "comment": "Do we ensure the pin is valid?",
+  "pin_validation": true,
+
+  "comment": "What is the minimum pin length?",
+  "pin_min": 0,
+
+  "comment": "What is the maximum pin length?",
+  "pin_max": 64,
+
+  "comment": "Do we ensure the secret is valid as well?",
+  "secret_validation": false,
+  "secret_min": 0,
+  "secret_max": 0,
+
+  "comment": "System clear should be called after every user entry... true or false?",
+  "clear": false,
+  "comment": "What is your clear command?",
+  "clear_command": "clear",
+
+  "comment": "See lib/otpr/config.rb for other available keys.",
+  "comment": ""
+}

@@ -50,14 +50,18 @@ def get_secret
   (OPTIONS[:random])? computer_random : user_secret
 end
 
+def get_salt(dir)
+  saltfile = File.join dir, 'salt'
+  unless File.exist? saltfile
+    STDERR.puts OTPR::CONFIG[:writting] + saltfile
+    File.open(saltfile, 'w', 0600){|f| f.write OTPR::Entropy.computer.to(:qgraph)}
+  end
+  File.read saltfile
+end
 
 USERSPACE = USER_SPACE::UserSpace.new
-if USERSPACE.config? # file exists
-  USERSPACE.config.each{|opt, value| OTPR::CONFIG[opt.to_sym] = value}
-else
-  STDERR.puts OTPR::CONFIG[:writting] + USERSPACE.config_file_name
-  USERSPACE.config = OTPR::CONFIG
-end
+USERSPACE.trace = STDERR
+USERSPACE.configures(OTPR::CONFIG)
 
 begin
   OPTIONS = HELP_PARSER::HelpParser.new(OTPR::VERSION, OTPR::CONFIG[:help])
@@ -74,12 +78,7 @@ begin
   Dir.mkdir(MEDIA_CACHE, 0700) unless File.exist? MEDIA_CACHE
   assert File.directory?(MEDIA_CACHE), "Not a directory:#{MEDIA_CACHE}"
 
-  SALTFILE = File.join MEDIA_CACHE, 'salt'
-  unless File.exist? SALTFILE
-    STDERR.puts OTPR::CONFIG[:writting] + SALTFILE
-    File.open(SALTFILE, 'w', 0600){|f| f.write OTPR::Entropy.computer.to(:qgraph)}
-  end
-  SALT = File.read SALTFILE
+  SALT = get_salt(MEDIA_CACHE) + get_salt(USERSPACE.cachedir)
 
   if OPTIONS[:erase]
     if ask(OTPR::CONFIG[:confirm_erase])==OTPR::CONFIG[:y]
