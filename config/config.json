@@ -14,9 +14,9 @@
   "pin_max": 64,
 
   "comment": "Do we ensure the secret is valid as well?",
-  "secret_validation": false,
+  "secret_validation": true,
   "secret_min": 0,
-  "secret_max": 0,
+  "secret_max": 64,
 
   "comment": "System clear should be called after every user entry... true or false?",
   "clear": false,

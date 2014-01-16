@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 # Gems
+require 'rainbow'
 require 'help_parser'
 require 'user_space'
 # This Gem
@@ -8,7 +9,7 @@ include OTPR
 
 def assert(b, comment)
   unless b # This is a sanity check.
-    STDERR.puts CONFIG[comment] || comment
+    STDERR.puts (CONFIG[comment] || comment).color(:red)
     exit 76 # ProtocolError: This error really should not be possible.
   end
 end
@@ -69,7 +70,7 @@ end
 def get_salt(dir)
   saltfile = File.join dir, 'salt'
   unless File.exist? saltfile
-    STDERR.puts CONFIG[:writting] + saltfile
+    STDERR.puts (CONFIG[:writting] + saltfile).color(:green)
     File.open(saltfile, 'w', 0600){|f| f.write Entropy.computer.to(:qgraph)}
   end
   File.read saltfile
@@ -81,7 +82,7 @@ def delete_files_in_dir(dir)
     if File.file?(filename)
       File.unlink(filename)
     else
-      STDERR.puts "Did not delete #{filename}"
+      STDERR.puts "Did not delete #{filename}".color(:green)
     end
   end
 end
@@ -157,7 +158,12 @@ begin
       puts otpr.get
       confirmed = ask(CONFIG[:confirm_delete])==CONFIG[:y]
     end
-    otpr.delete if confirmed
+    if confirmed
+      otpr.delete
+      puts CONFIG[:ok]
+    else
+      puts CONFIG[:cancelled]
+    end
     exit
   end
 
@@ -188,7 +194,7 @@ begin
   assert(false, :unexpected_program_flow)
 
 rescue OTPR::Error
-  puts $!.message
+  STDERR.puts $!.message.color(:red)
   # Most likely a user fixable failure.
   # Maybe the user forgot to insert the media.
   # So categorized here as a TempFail.
@@ -197,6 +203,6 @@ rescue HELP_PARSER::UsageException
   puts $!.message
   exit 0
 rescue HELP_PARSER::UsageError
-  STDERR.puts $!.message
+  STDERR.puts $!.message.color(:red)
   exit 64
 end

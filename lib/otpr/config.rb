@@ -51,7 +51,7 @@ See `gem man otpr` for more help.
     :overwrite     => false,
     # More default Options
     :pin_validation    => true,
-    :secret_validation => false,
+    :secret_validation => true,
     :media             => '/media/KINGSTON/',
 
     # Default Options not defined in help...
@@ -99,6 +99,7 @@ See `gem man otpr` for more help.
     :not_bucket_full    => 'Did not get a full bucket.',
     :could_not_set      => 'Could not set secret.',
     :pin_does_not_exist => 'Pin does not exist.',
+    :pin_exist          => 'Pin exist.',
 
     # Status Responses
     :ok           => 'OK',

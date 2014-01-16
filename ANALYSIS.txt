@@ -4,7 +4,7 @@ So if y=x*F, then x=y/F.
 But if y=F[x], there's no way of getting x from y.
 
 p  :: Pin: typically 3 to 7 characters.
-s  :: Salt: 256 bits (64 nibbles).
+s  :: Salt: 256 bits (64 nibbles) * 2.
 ps :: Passphrase
 
   ps = s+p # String concatanation
