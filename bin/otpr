@@ -22,9 +22,13 @@ def ask(question)
   STDIN.gets.strip
 end
 
+def system_clear
+  system(CONFIG[:clear_command]) if CLEAR
+end
+
 def get_pin
   pin = (OPTIONS[:batch])? STDIN.gets.strip : Pin.gets
-  system('clear') if CLEAR
+  system_clear
   return pin
 end
 
@@ -36,14 +40,14 @@ def user_secret
     :pin_not_valid  => CONFIG[:secret_not_valid],
   }
   secret = (OPTIONS[:batch])?  STDIN.gets.strip : Pin.gets(options)
-  system(clear) if CLEAR
+  system_clear
   return secret
 end
 
 def computer_random
   return Entropy.computer.to(:qgraph) if OPTIONS[:batch]
   random = Entropy.redundant.to(:qgraph)
-  system('clear') if CLEAR
+  system_clear
   return random
 end
 
