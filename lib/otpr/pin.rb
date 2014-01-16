@@ -2,7 +2,7 @@ module OTPR
   module Pin
     def self.gets(conf={})
       conf.extend Config
-      min, max = conf[:pinmin], conf[:pinmax]
+      min, max = conf[:pin_min], conf[:pin_max]
       pin, pin0 = '', nil
       # Ensure user can acurately enter and repeat the pin
       until pin == pin0

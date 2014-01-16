@@ -10,46 +10,50 @@ module OTPR
   REJECT  = /['"]/
 
   CONFIG = {
-    :choose_one => 'Choose one action.',
-    :writting => 'Writting ',
+    # Error messages
+    :choose_one         => 'Choose one action.',
+    :writting           => 'Writting ',
+    :media_not_found    => 'Pad directories not found.',
+    :no_yin_yang        => 'Pad files not found.',
+    :not_bucket_full    => 'Did not get a full bucket.',
+    :could_not_set      => 'Could not set secret.',
+    :pin_does_not_exist => 'Pin does not exist.',
 
-    :clear => false,
+    :clear         => false,
+    :clear_command => 'clear',
+    :media         => '/media/KINGSTON/',
+    :random_web    =>
+      'http://www.random.org/integers/?num=64&min=0&max=15&col=64&base=10&format=plain&rnd=new',
 
-    :media => '/media/KINGSTON/',
-    :media_not_found => 'Pad directories not found.',
+    # About the pin
+    :enter_pin      => 'Pin: ',
+    :pin_validation => true,
+    :pin_min        => 0,
+    :pin_too_short  => "Pin is too short.",
+    :pin_max        => 64,
+    :pin_too_long   => "Pin is too long.",
+    :pin_not_valid  => "Pin has illegal characters.",
+    :repeat_pin     => "Repeat the pin.",
 
-    :pinmin => 0,
-    :pin_too_short => "Pin is too short.",
-
-    :pinmax => 64,
-    :pin_too_long => "Pin is too long.",
-
-    :pin_not_valid    => "Pin has illegal characters.",
-    :secret_not_valid => "Secret has illegal characters.",
-
-    :pin_validation    => true,
+    # About the secret
+    :enter_secret      => 'Secret: ',
     :secret_validation => false,
+    :secret_min        => 0,
+    :secret_too_short  => "Secret is too short.",
+    :secret_max        => 64,
+    :secret_too_long   => "Secret is too long.",
+    :secret_not_valid  => "Secret has illegal characters.",
+    :repeat_secret     => "Repeat secret.",
 
-    :repeat_pin    => "Repeat the pin.",
-    :repeat_secret => "Repeat secret.",
-
-    :enter_pin    => 'Pin: ',
-    :enter_secret => 'Secret: ',
-
+    # Prompts
     :gibberish_prompt => 'Please randomly type at least $N words of gibberish:',
+    :confirm_delete   => 'Delete(Y/n)?: ',
+    :confirm_erase    => 'Erase All Pins(Y/n)?: ',
 
-    :confirm_delete => 'Delete(Y/n)?: ',
-    :confirm_erase  => 'Erase All Pins(Y/n)?: ',
+    # What must 'yes' be on confirmations?
     :y => 'Y',
 
-    :random_web =>
-      'http://www.random.org/integers/?num=64&min=0&max=15&col=64&base=10&format=plain&rnd=new',
-    :not_bucket_full => 'Did not get a full bucket.',
-
-    :no_yin_yang => 'Pad files not found.',
-
-    :could_not_set => 'Could not set secret.',
-
+    # The help text
     :help => <<-HELP
 Usage: otpr [options]
 Options:

@@ -4,10 +4,11 @@ require 'help_parser'
 require 'user_space'
 # This Gem
 require 'otpr'
+include OTPR
 
 def assert(b, comment)
   unless b # This is a sanity check.
-    STDERR.puts OTPR::CONFIG[comment] || comment
+    STDERR.puts CONFIG[comment] || comment
     exit 76 # ProtocolError: This error really should not be possible.
   end
 end
@@ -22,26 +23,26 @@ def ask(question)
 end
 
 def get_pin
-  pin = (OPTIONS[:batch])? STDIN.gets.strip : OTPR::Pin.gets
+  pin = (OPTIONS[:batch])? STDIN.gets.strip : Pin.gets
   system('clear') if CLEAR
   return pin
 end
 
 def user_secret
   options = {
-    :enter_pin      => OTPR::CONFIG[:enter_secret],
-    :repeat_pin     => OTPR::CONFIG[:repeat_secret],
-    :pin_validation => OTPR::CONFIG[:secret_validation],
-    :pin_not_valid  => OTPR::CONFIG[:secret_not_valid],
+    :enter_pin      => CONFIG[:enter_secret],
+    :repeat_pin     => CONFIG[:repeat_secret],
+    :pin_validation => CONFIG[:secret_validation],
+    :pin_not_valid  => CONFIG[:secret_not_valid],
   }
-  secret = (OPTIONS[:batch])?  STDIN.gets.strip : OTPR::Pin.gets(options)
+  secret = (OPTIONS[:batch])?  STDIN.gets.strip : Pin.gets(options)
   system(clear) if CLEAR
   return secret
 end
 
 def computer_random
-  return OTPR::Entropy.computer.to(:qgraph) if OPTIONS[:batch]
-  random = OTPR::Entropy.redundant.to(:qgraph)
+  return Entropy.computer.to(:qgraph) if OPTIONS[:batch]
+  random = Entropy.redundant.to(:qgraph)
   system('clear') if CLEAR
   return random
 end
@@ -53,27 +54,27 @@ end
 def get_salt(dir)
   saltfile = File.join dir, 'salt'
   unless File.exist? saltfile
-    STDERR.puts OTPR::CONFIG[:writting] + saltfile
-    File.open(saltfile, 'w', 0600){|f| f.write OTPR::Entropy.computer.to(:qgraph)}
+    STDERR.puts CONFIG[:writting] + saltfile
+    File.open(saltfile, 'w', 0600){|f| f.write Entropy.computer.to(:qgraph)}
   end
   File.read saltfile
 end
 
 USERSPACE = USER_SPACE::UserSpace.new
 USERSPACE.trace = STDERR
-USERSPACE.configures(OTPR::CONFIG)
+USERSPACE.configures(CONFIG)
 
 begin
-  OPTIONS = HELP_PARSER::HelpParser.new(OTPR::VERSION, OTPR::CONFIG[:help])
+  OPTIONS = HELP_PARSER::HelpParser.new(VERSION, CONFIG[:help])
 
   unless [:c,:r,:u,:d,:s,:C,:M,:erase].inject(false){|b,k| b^OPTIONS[k]}
-    OPTIONS.usage_error(OTPR::CONFIG[:choose_one]) 
+    OPTIONS.usage_error(CONFIG[:choose_one]) 
   end
 
-  CLEAR = OPTIONS[:clear, OTPR::CONFIG[:clear], true]
+  CLEAR = OPTIONS[:clear, CONFIG[:clear], true]
 
-  MEDIA = OPTIONS[:media, OTPR::CONFIG[:media]]
-  OTPR::Error.raise(:media_not_found) unless File.exist? MEDIA
+  MEDIA = OPTIONS[:media, CONFIG[:media]]
+  Error.raise(:media_not_found) unless File.exist? MEDIA
   MEDIA_CACHE = File.join MEDIA, '.otpr'
   Dir.mkdir(MEDIA_CACHE, 0700) unless File.exist? MEDIA_CACHE
   assert File.directory?(MEDIA_CACHE), "Not a directory:#{MEDIA_CACHE}"
@@ -81,7 +82,7 @@ begin
   SALT = get_salt(MEDIA_CACHE) + get_salt(USERSPACE.cachedir)
 
   if OPTIONS[:erase]
-    if ask(OTPR::CONFIG[:confirm_erase])==OTPR::CONFIG[:y]
+    if ask(CONFIG[:confirm_erase])==CONFIG[:y]
       Dir.glob(File.join(MEDIA_CACHE, '*')).each do |filename|
         # Don't know why there would be anything but regular file, but...
         File.unlink(filename) if File.file?(filename)
@@ -95,7 +96,7 @@ begin
     exit
   end
 
-  otpr = OTPR::Otpr.new(SALT+get_pin, MEDIA_CACHE, USERSPACE.cachedir)
+  otpr = Otpr.new(SALT+get_pin, MEDIA_CACHE, USERSPACE.cachedir)
 
   if OPTIONS[:create]
     OPTIONS.usage_error(:pin_exist) if otpr.exist?
@@ -107,7 +108,7 @@ begin
   end
 
   if OPTIONS[:update]
-    OPTIONS.usage_error(:pin_does_not_exist) unless otpr.exist?
+    OPTIONS.usage_error(CONFIG[:pin_does_not_exist]) unless otpr.exist?
     puts otpr.get unless OPTIONS[:batch]
     secret = get_secret
     otpr.set secret
@@ -117,8 +118,8 @@ begin
   end
 
   if OPTIONS[:copy] or OPTIONS[:move]
-    OPTIONS.usage_error(:pin_does_not_exist) unless otpr.exist?
-    otpr2 = OTPR::Otpr.new(SALT+get_pin, USERSPACE.cachedir, MEDIA_CACHE)
+    OPTIONS.usage_error(CONFIG[:pin_does_not_exist]) unless otpr.exist?
+    otpr2 = Otpr.new(SALT+get_pin, USERSPACE.cachedir, MEDIA_CACHE)
     OPTIONS.usage_error(:pin_exists) unless OPTIONS[:overwrite] or !otpr2.exist?
     secret = otpr.get
     otpr2.set secret
@@ -129,18 +130,18 @@ begin
   end
 
   if OPTIONS[:delete]
-    OPTIONS.usage_error(:pin_does_not_exist) unless otpr.exist?
+    OPTIONS.usage_error(CONFIG[:pin_does_not_exist]) unless otpr.exist?
     confirmed = true
     unless OPTIONS[:batch]
       puts otpr.get
-      confirmed = ask(OTPR::CONFIG[:confirm_delete])==OTPR::CONFIG[:y]
+      confirmed = ask(CONFIG[:confirm_delete])==CONFIG[:y]
     end
     otpr.delete if confirmed
     exit
   end
 
   if OPTIONS[:read]
-    OPTIONS.usage_error(:pin_does_not_exist) unless otpr.exist?
+    OPTIONS.usage_error(CONFIG[:pin_does_not_exist]) unless otpr.exist?
     secret = otpr.get
     puts secret
     if OPTIONS[:regen]
@@ -165,7 +166,7 @@ begin
 
   assert(false, :unexpected_program_flow)
 
-rescue OTPR::Error
+rescue Error
   puts $!.message
   # Most likely a user fixable failure.
   # Maybe the user forgot to insert the media.
