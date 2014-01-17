@@ -1,8 +1,20 @@
 #!/usr/bin/env ruby
+
+# This is an undocumented flag.
+# If the very first argument is a -t,
+# we're running in test mode.
+if ARGV[0]=='-t'
+  ARGV.shift
+  T = true
+else
+  T = false
+end
+
 # Gems
 require 'rainbow'
 require 'help_parser'
 require 'user_space'
+
 # This Gem
 require 'otpr'
 include OTPR
@@ -94,7 +106,7 @@ USERSPACE.configures(CONFIG)
 begin
   OPTIONS = HELP_PARSER::HelpParser.new(VERSION, CONFIG[:help])
   unless [:c,:r,:u,:d,:s,:C,:M,:erase].inject(false){|b,k| b^OPTIONS[k]}
-    OPTIONS.usage_error(CONFIG[:choose_one]) 
+    OPTIONS.usage_error(:choose_one) 
   end
   CONFIG.keys.each do |key|
     CONFIG[key] = OPTIONS[key] unless OPTIONS[key].nil?
@@ -121,7 +133,7 @@ begin
   otpr = Otpr.new(SALT+get_pin, MEDIA_CACHE, USERSPACE.cachedir)
 
   if OPTIONS[:create]
-    OPTIONS.usage_error(CONFIG[:pin_exist]) if otpr.exist?
+    OPTIONS.usage_error(:pin_exist) if otpr.exist?
     secret = get_secret
     otpr.set secret
     assert_equal(otpr.get, secret, :could_not_set)
@@ -130,7 +142,7 @@ begin
   end
 
   if OPTIONS[:update]
-    OPTIONS.usage_error(CONFIG[:pin_does_not_exist]) unless otpr.exist?
+    OPTIONS.usage_error(:pin_does_not_exist) unless otpr.exist?
     puts otpr.get unless CONFIG[:batch]
     secret = get_secret
     otpr.set secret
@@ -140,9 +152,9 @@ begin
   end
 
   if OPTIONS[:copy] or OPTIONS[:move]
-    OPTIONS.usage_error(CONFIG[:pin_does_not_exist]) unless otpr.exist?
+    OPTIONS.usage_error(:pin_does_not_exist) unless otpr.exist?
     otpr2 = Otpr.new(SALT+get_pin, USERSPACE.cachedir, MEDIA_CACHE)
-    OPTIONS.usage_error(CONFIG[:pin_exists]) unless CONFIG[:overwrite] or !otpr2.exist?
+    OPTIONS.usage_error(:pin_exists) unless CONFIG[:overwrite] or !otpr2.exist?
     secret = otpr.get
     otpr2.set secret
     assert_equal(otpr2.get, secret, :could_not_set)
@@ -152,7 +164,7 @@ begin
   end
 
   if OPTIONS[:delete]
-    OPTIONS.usage_error(CONFIG[:pin_does_not_exist]) unless otpr.exist?
+    OPTIONS.usage_error(:pin_does_not_exist) unless otpr.exist?
     confirmed = true
     unless CONFIG[:batch]
       puts otpr.get
@@ -168,7 +180,7 @@ begin
   end
 
   if OPTIONS[:read]
-    OPTIONS.usage_error(CONFIG[:pin_does_not_exist]) unless otpr.exist?
+    OPTIONS.usage_error(:pin_does_not_exist) unless otpr.exist?
     secret = otpr.get
     puts secret
     if CONFIG[:regen]
@@ -203,6 +215,8 @@ rescue HELP_PARSER::UsageException
   puts $!.message
   exit 0
 rescue HELP_PARSER::UsageError
-  STDERR.puts $!.message.color(:red)
+  msg = $!.message
+  msg = (CONFIG[msg.to_sym] || msg).color(:red) unless T
+  STDERR.puts msg
   exit 64
 end
