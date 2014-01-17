@@ -94,14 +94,41 @@ def get_salt(dir)
   File.read saltfile
 end
 
-def delete_files_in_dir(dir)
-  Dir.glob(File.join(dir, '*')).each do |filename|
+def delete_files_in_dir(zin, zang)
+  Dir.glob(File.join(zin, '*')).each do |filename|
     # Don't know why there would be anything but regular file, but...
     if File.file?(filename)
       File.unlink(filename)
+      name = File.basename(filename)
+      unless name == 'salt'
+        filename2 = File.join(zang, name)
+        if File.exist?(filename2)
+          File.unlink(filename2)
+        else
+          # This is an alert for possible problems with the software.
+          STDERR.puts "Unpaired key deleted: #{name}".color(:green)
+        end
+      end
     else
+      # This is an alert for possible problems with the software.
       STDERR.puts "Did not delete #{filename}".color(:green)
     end
+  end
+  zang_glob = Dir.glob(File.join(zang, '*'))
+  if zang_glob.length == 0
+    # This is an alert for possible problems with the software.
+    STDERR.puts "Zang did not have salt.".color(:green)
+  elsif zang_glob.length == 1
+    salt = zang_glob.shift
+    if File.basename(salt) == 'salt'
+      File.unlink salt
+    else
+      # This is an alert for possible problems with the software.
+      STDERR.puts "Zang's remaining file is not salt.".color(:green)
+    end
+  else
+    # This is an alert that zang may be housing multiple medias.
+    STDERR.puts "Zang has keys not found in Zin.".color(:green)
   end
 end
 
@@ -119,6 +146,7 @@ begin
   end
 
   raise OTPR::Error, :media_not_found unless File.exist? CONFIG[:media]
+  raise OTPR::Error, :media_not_a_directory unless File.directory? CONFIG[:media]
   MEDIA_CACHE = File.join CONFIG[:media], '.otpr'
   Dir.mkdir(MEDIA_CACHE, 0700) unless File.exist? MEDIA_CACHE
   assert File.directory?(MEDIA_CACHE), "Not a directory:#{MEDIA_CACHE}"
@@ -127,8 +155,7 @@ begin
 
   if OPTIONS[:erase]
     if ask(CONFIG[:confirm_erase])==CONFIG[:y]
-      delete_files_in_dir(MEDIA_CACHE)
-      delete_files_in_dir(USERSPACE.cachedir)
+      delete_files_in_dir(MEDIA_CACHE, USERSPACE.cachedir)
       puts CONFIG[:ok]
     else
       puts CONFIG[:cancelled]

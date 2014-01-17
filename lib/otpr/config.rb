@@ -94,7 +94,8 @@ More help: gem man otpr
     # Error messages
     :choose_one         => 'Choose one action.',
     :writting           => 'Writting ',
-    :media_not_found    => 'Pad directories not found.',
+    :media_not_found    => 'Media directory not found.',
+    :media_not_a_directory => 'Media not a directory.',
     :no_yin_yang        => 'Pad files not found.',
     :not_bucket_full    => 'Did not get a full bucket.',
     :could_not_set      => 'Could not set secret.',
