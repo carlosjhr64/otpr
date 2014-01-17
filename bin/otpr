@@ -1,5 +1,14 @@
 #!/usr/bin/env ruby
 
+# Gems
+require 'rainbow'
+require 'help_parser'
+require 'user_space'
+
+# This Gem
+require 'otpr'
+include OTPR
+
 # This is an undocumented flag.
 # If the very first argument is a -t,
 # we're running in test mode.
@@ -10,14 +19,11 @@ else
   T = false
 end
 
-# Gems
-require 'rainbow'
-require 'help_parser'
-require 'user_space'
-
-# This Gem
-require 'otpr'
-include OTPR
+def error_message
+  msg = $!.message
+  msg = (CONFIG[msg.to_sym] || msg).color(:red) unless T
+  STDERR.puts msg
+end
 
 def assert(b, comment)
   unless b # This is a sanity check.
@@ -112,7 +118,7 @@ begin
     CONFIG[key] = OPTIONS[key] unless OPTIONS[key].nil?
   end
 
-  OTPR::Error.raise(:media_not_found) unless File.exist? CONFIG[:media]
+  raise OTPR::Error, :media_not_found unless File.exist? CONFIG[:media]
   MEDIA_CACHE = File.join CONFIG[:media], '.otpr'
   Dir.mkdir(MEDIA_CACHE, 0700) unless File.exist? MEDIA_CACHE
   assert File.directory?(MEDIA_CACHE), "Not a directory:#{MEDIA_CACHE}"
@@ -206,7 +212,7 @@ begin
   assert(false, :unexpected_program_flow)
 
 rescue OTPR::Error
-  STDERR.puts $!.message.color(:red)
+  error_message
   # Most likely a user fixable failure.
   # Maybe the user forgot to insert the media.
   # So categorized here as a TempFail.
@@ -215,8 +221,6 @@ rescue HELP_PARSER::UsageException
   puts $!.message
   exit 0
 rescue HELP_PARSER::UsageError
-  msg = $!.message
-  msg = (CONFIG[msg.to_sym] || msg).color(:red) unless T
-  STDERR.puts msg
+  error_message
   exit 64
 end

@@ -2,7 +2,7 @@ module OTPR
   class Otpr
     def initialize(passphrase, yindir, yangdir)
       unless File.exist?(yindir) and File.exist?(yangdir)
-        Error.raise(:media_not_found)
+        raise Error, :media_not_found
       end
       key   = DIGEST.digest(passphrase)
       @key  = OTPR::Key.new(key)
@@ -35,7 +35,7 @@ module OTPR
     end
 
     def get
-      Error.raise(:no_yin_yang) unless exist?
+      raise Error, :no_yin_yang unless exist?
       yin   = File.read @zin
       dyin  = DIGEST.digest(yin)
       yang  = File.read @zang
