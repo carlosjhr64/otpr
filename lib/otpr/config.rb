@@ -99,6 +99,7 @@ More help: gem man otpr
     :no_yin_yang        => 'Pad files not found.',
     :not_bucket_full    => 'Did not get a full bucket.',
     :could_not_set      => 'Could not set secret.',
+    :pin_inconsistent   => 'Pin is missing a key.',
     :pin_does_not_exist => 'Pin does not exist.',
     :pin_exist          => 'Pin exist.',
 

@@ -32,12 +32,16 @@ def assert(b, comment)
   end
 end
 
+def refute(b, comment)
+  assert(!b, comment)
+end
+
 def assert_equal(a, b, comment)
   assert(a==b, comment)
 end
 
 def ask(question)
-  print question
+  print question unless CONFIG[:batch]
   STDIN.gets.strip
 end
 
@@ -75,9 +79,13 @@ def user_secret
 end
 
 def computer_random
-  return Entropy.computer.to(:qgraph) if CONFIG[:batch]
-  random = Entropy.redundant.to(:qgraph)
+  random = (CONFIG[:batch])?
+    Entropy.computer.to(:qgraph) :
+    Entropy.redundant.to(:qgraph)
   system_clear
+  while random.length < 40
+    random = '!'+random
+  end
   return random
 end
 
@@ -164,6 +172,7 @@ begin
   end
 
   otpr = Otpr.new(SALT+get_pin, MEDIA_CACHE, USERSPACE.cachedir)
+  refute otpr.inconsistent?, :pin_inconsistent
 
   if OPTIONS[:create]
     OPTIONS.usage_error(:pin_exist) if otpr.exist?
@@ -186,7 +195,7 @@ begin
 
   if OPTIONS[:copy] or OPTIONS[:move]
     OPTIONS.usage_error(:pin_does_not_exist) unless otpr.exist?
-    otpr2 = Otpr.new(SALT+get_pin, USERSPACE.cachedir, MEDIA_CACHE)
+    otpr2 = Otpr.new(SALT+get_pin, MEDIA_CACHE, USERSPACE.cachedir)
     OPTIONS.usage_error(:pin_exists) unless CONFIG[:overwrite] or !otpr2.exist?
     secret = otpr.get
     otpr2.set secret

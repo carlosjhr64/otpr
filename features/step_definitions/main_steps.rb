@@ -18,6 +18,14 @@ Dir.mkdir DATADIR
 
 H = {}
 
+def _popen(command, lines)
+  IO.popen(command, 'w+'){|p|
+    lines.each{|line| p.puts line}
+    H['stdout'] = (a=p.gets)? a.chomp : a
+  }
+  H['status'] = $?.exitstatus
+end
+
 def _capture3(command)
   stdout, stderr, status = Open3.capture3(command)
   H['status'] = status.exitstatus
@@ -31,6 +39,8 @@ def _given(condition)
     H[$1] = $2
   when /^system\(([^\(\)]*)\)$/
     system($1)
+  when /^(\w+)=(\w+)$/
+    H[$1]=H[$2]
   else
     raise "Unrecognized Given-Statement"
   end
@@ -40,10 +50,15 @@ def _when(condition)
   case condition
   when 'run'
     command, arguments = H['command'], H['arguments']
-    raise 'Need command and argurments to run' unless command and arguments
+    raise 'Need command and arguments to run' unless command and arguments
     _capture3("#{command} #{arguments}")
   when /^run\(([^\(\)]*)\)$/
     _capture3($1)
+  when /^popen\(([^\(\)]*)\)$/
+    lines = $1.strip.split(/\s+/)
+    command, arguments = H['command'], H['arguments']
+    raise 'Need command and arguments to popen' unless command and arguments
+    _popen("#{command} #{arguments}", lines)
   else
     raise "Unrecognized When-Statement"
   end
@@ -51,6 +66,9 @@ end
 
 def _then(condition)
   case condition
+  when /^(\w+)==(\w+)$/
+    a, b = H[$1], H[$2]
+    raise "#{a}!=#{b}" unless a==b
   when /^(not )?system\(([^\(\)]*)\)$/
     neg, cmd = $1, $2
     ok = system(cmd)
