@@ -11,7 +11,7 @@ module OTPR
   # UNLESS ONE IS PREPARED TO CHECK EVERYTHING ELSE
   SBT     = :hex    # Standard Base Type
 
-  # Computed Configuration
+  # Computable Configuration
   # Example values assumes SHA256 above,
   # with  MD5 checksum,
   # :hex standard base type,
@@ -22,7 +22,7 @@ module OTPR
   ENTROPY       = 8*DIGEST_LENGTH             # 256
   NIBBLES       = ENTROPY/4                   # 64
   WORDS         = (0.5 + ENTROPY/16.0).round  # 17
-  SBS           = BaseConvert::BASE[SBT]      # 16 Standard Base Size
+  SBS           = BaseConvert::BASE[SBT]      # 16 Standard/Hex Base Size
   PPS           = BaseConvert::BASE[PPT]      # 91 Passphrase Base Size
   PNS           = BaseConvert::BASE[PNT]      # 62 Pin Base Size
   PPK           = 8*Math.log(2)/Math.log(PPS) # 1.229...

@@ -1,11 +1,29 @@
 module OTPR
   module Entropy
+
+    module Paddable
+      def z=(z)
+        @z = z
+      end
+
+      def pad!(min)
+        while self.length < min
+          self.insert(0, @z)
+        end
+        self
+      end
+    end
+
     module Convertable
       def to(base_key)
         # Note that xself is always base 16!
         # Not a configurable option here.
         xself = self.map{|r| r.to_s(SBS)}.join
-        BaseConvert.new(SBT, base_key).convert(xself)
+        base = BaseConvert.new(SBT, base_key)
+        bself = base.convert(xself)
+        bself.extend Paddable
+        bself.z = base.to_digits.first
+        return bself
       end
     end
 

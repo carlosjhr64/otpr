@@ -62,13 +62,10 @@ end
 
 def computer_random
   random = (CONFIG[:batch])?
-    Entropy.computer.to(:qgraph) :
-    Entropy.redundant.to(:qgraph)
+    Entropy.computer.to(PPT) :
+    Entropy.redundant.to(PPT)
   system_clear
-  while random.length < 40
-    random = '!'+random
-  end
-  return random
+  random.pad!(PPL)
 end
 
 def get_secret
