@@ -26,6 +26,7 @@ def _popen(command, lines)
   H['status'] = $?.exitstatus
 end
 
+
 def _capture3(command)
   stdout, stderr, status = Open3.capture3(command)
   H['status'] = status.exitstatus
@@ -35,12 +36,12 @@ end
 
 def _given(condition)
   case condition
+  when /^(\w+)=(\w+)$/
+    H[$1]=H[$2]
   when /^(\w+) "([^"]*)"$/
     H[$1] = $2
   when /^system\(([^\(\)]*)\)$/
     system($1)
-  when /^(\w+)=(\w+)$/
-    H[$1]=H[$2]
   else
     raise "Unrecognized Given-Statement"
   end
