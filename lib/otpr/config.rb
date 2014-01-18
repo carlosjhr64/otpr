@@ -17,14 +17,14 @@ module OTPR
   # :hex standard base type,
   # :qgraph passphrase, and
   # :word pin.
-  DIGEST_LENGTH = DIGEST.digest('').length  # 32
-  CHKSUM_LENGTH = CHKSUM.digest('').length  # 16
-  ENTROPY       = 8*DIGEST_LENGTH           # 256
-  NIBBLES       = ENTROPY/4                 # 64
-  WORDS         = ENTROPY/16                # 16
-  SBS           = BaseConvert::BASE[SBT]    # 16 Standard Base Size
-  PPS           = BaseConvert::BASE[PPT]    # 91 Passphrase Base Size
-  PNS           = BaseConvert::BASE[PNT]    # 62 Pin Base Size
+  DIGEST_LENGTH = DIGEST.digest('').length   # 32
+  CHKSUM_LENGTH = CHKSUM.digest('').length   # 16
+  ENTROPY       = 8*DIGEST_LENGTH            # 256
+  NIBBLES       = ENTROPY/4                  # 64
+  WORDS         = (0.5 + ENTROPY/16.0).round # 17
+  SBS           = BaseConvert::BASE[SBT]     # 16 Standard Base Size
+  PPS           = BaseConvert::BASE[PPT]     # 91 Passphrase Base Size
+  PNS           = BaseConvert::BASE[PNT]     # 62 Pin Base Size
   PPK           = 8*Math.log(2)/Math.log(PPS)
   PNK           = 8*Math.log(2)/Math.log(PNS)
   PPL           = (1+PPK*DIGEST_LENGTH).to_i
