@@ -25,7 +25,13 @@ module OTPR
       File.unlink(@zang) if File.exist?(@zang)
     end
 
-    def set(plain)
+    def set(plain, s=true)
+      if s
+        plain = plain.strip
+        while plain.length < 40
+          plain+=' '
+        end
+      end
       encripted = @key.xor(plain)
       yin   = OTPR::Entropy.computer.to(:qgraph)
       dyin  = DIGEST.digest(yin)
@@ -34,13 +40,14 @@ module OTPR
       File.open(@zang, 'w', 0600){|f| f.write yang}
     end
 
-    def get
+    def get(s=true)
       raise Error, :no_yin_yang unless exist?
       yin   = File.read @zin
       dyin  = DIGEST.digest(yin)
       yang  = File.read @zang
       encripted = OTPR::Key.new(dyin).xor(yang)
       plain = @key.xor(encripted)
+      plain.strip! if s
       return plain
     end
   end
