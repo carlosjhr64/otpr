@@ -7,17 +7,15 @@ require 'user_space'
 
 # This Gem
 require 'otpr'
-extend OTPR::Helpers
 include OTPR
+extend  Helpers
 
 # This is an undocumented flag.
 # If the very first argument is a -t,
 # we're running in test mode.
 if ARGV[0]=='-t'
   ARGV.shift
-  T = true
-else
-  T = false
+  CONFIG[:test_mode] = true
 end
 
 USERSPACE = USER_SPACE::UserSpace.new

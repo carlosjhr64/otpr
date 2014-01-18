@@ -3,7 +3,7 @@ module Helpers
 
 def error_message
   msg = $!.message
-  msg = (CONFIG[msg.to_sym] || msg).color(:red) unless T
+  msg = (CONFIG[msg.to_sym] || msg).color(:red) unless CONFIG[:test_mode]
   STDERR.puts msg
 end
 
