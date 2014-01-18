@@ -10,7 +10,8 @@ module OTPR
         pin, pin0, length = pin0, nil, -1
         until (length >= min) and (length <= max) and (pin0 =~ accept) and !(pin0 =~ reject)
           print conf[:enter_pin]
-          pin0 = ((conf[:echo])? STDIN.gets : STDIN.noecho(&:gets)).strip
+          pin0 = (conf[:echo])? STDIN.gets : STDIN.noecho(&:gets)
+          pin0 = (STRIP)? pin0.strip : pin0.chomp
           puts unless conf[:echo]
           length = pin0.length
           break unless conf[:pin_validation]

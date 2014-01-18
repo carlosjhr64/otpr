@@ -4,8 +4,8 @@ module OTPR
       def to(base_key)
         # Note that xself is always base 16!
         # Not a configurable option here.
-        xself = self.map{|r| r.to_s(16)}.join
-        BaseConvert.new(:hexadecimal, base_key).convert(xself)
+        xself = self.map{|r| r.to_s(SBS)}.join
+        BaseConvert.new(SBT, base_key).convert(xself)
       end
     end
 
@@ -22,7 +22,7 @@ module OTPR
     end
 
     def self.computer
-      computer = 0.upto(NIBBLES-1).inject([]){|a, i| a<<SecureRandom.random_number(BASE)}
+      computer = 0.upto(NIBBLES-1).inject([]){|a, i| a<<SecureRandom.random_number(SBS)}
       computer.extend Convertable
       return computer
     end
@@ -35,7 +35,7 @@ module OTPR
         user += ((conf[:echo])? STDIN.gets : STDIN.noecho(&:gets)).strip.split(/\s+/)
         user.uniq!
       end
-      user = DIGEST.hexdigest(user.join(' ')).chars.map{|h|h.to_i(BASE)}
+      user = DIGEST.hexdigest(user.join(' ')).chars.map{|h|h.to_i(SBS)}
       user.extend Convertable
       return user
     end
@@ -46,8 +46,8 @@ module OTPR
       user = Entropy.user
       computer = Entropy.computer
       redundant = 0.upto(NIBBLES-1).inject([]) do |a, i|
-        r = (computer[i] + user[i])%BASE
-        r = (r + web[i])%BASE if web
+        r = (computer[i] + user[i])%SBS
+        r = (r + web[i])%SBS if web
         a<<r
       end
       redundant.extend Convertable

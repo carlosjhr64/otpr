@@ -1,10 +1,34 @@
 module OTPR
-  BITS    = 256
-  NIBBLES = 64
-  WORDS   = 16
+
+  # Defining Configuration
   DIGEST  = Digest::SHA256
   CHKSUM  = Digest::MD5
-  BASE    = 16
+  PPT     = :qgraph # Passphrase Type
+  PNT     = :word   # Pin Type
+  STRIP   = true    # leading and trailing whitespaces are meaningless?
+
+  # THIS ONE SHOULD NOT BE CHANGED
+  # UNLESS ONE IS PREPARED TO CHECK EVERYTHING ELSE
+  SBT     = :hex    # Standard Base Type
+
+  # Computed Configuration
+  # Example values assumes SHA256 above,
+  # with  MD5 checksum,
+  # :hex standard base type,
+  # :qgraph passphrase, and
+  # :word pin.
+  DIGEST_LENGTH = DIGEST.digest('').length  # 32
+  CHKSUM_LENGTH = CHKSUM.digest('').length  # 16
+  ENTROPY       = 8*DIGEST_LENGTH           # 256
+  NIBBLES       = ENTROPY/4                 # 64
+  WORDS         = ENTROPY/16                # 16
+  SBS           = BaseConvert::BASE[SBT]    # 16 Standard Base Size
+  PPS           = BaseConvert::BASE[PPT]    # 91 Passphrase Base Size
+  PNS           = BaseConvert::BASE[PNT]    # 62 Pin Base Size
+  PPK           = 8*Math.log(2)/Math.log(PPS)
+  PNK           = 8*Math.log(2)/Math.log(PNS)
+  PPL           = (1+PPK*DIGEST_LENGTH).to_i
+  PNL           = (1+PNK*CHKSUM_LENGTH).to_i
 
   CONFIG = {
 
@@ -60,29 +84,29 @@ More help: gem man otpr
     # commands and urls
     :clear_command => 'clear',
     :random_web    =>
-      'http://www.random.org/integers/?num=64&min=0&max=15&col=64&base=10&format=plain&rnd=new',
+      "http://www.random.org/integers/?num=64&min=0&max=#{SBS-1}&col=64&base=10&format=plain&rnd=new",
 
     # About the pin
     :enter_pin      => 'Pin: ',
     :pin_min        => 0,
-    :pin_too_short  => "Pin is too short.",
-    :pin_max        => 64,
-    :pin_too_long   => "Pin is too long.",
-    :pin_accept     => "^[[:graph:]]*$",
-    :pin_reject     => "['\"]",
-    :pin_not_valid  => "Pin has illegal characters.",
-    :repeat_pin     => "Repeat the pin.",
+    :pin_too_short  => 'Pin is too short.',
+    :pin_max        => PNL,
+    :pin_too_long   => 'Pin is too long.',
+    :pin_accept     => '^\w*$',
+    :pin_reject     => '[_]',
+    :pin_not_valid  => 'Pin has illegal characters.',
+    :repeat_pin     => 'Repeat the pin.',
 
     # About the secret
     :enter_secret      => 'Secret: ',
     :secret_min        => 0,
-    :secret_too_short  => "Secret is too short.",
-    :secret_max        => 64,
-    :secret_too_long   => "Secret is too long.",
-    :secret_accept     => "^[[:graph:]]*$",
-    :secret_reject     => "['\"]",
-    :secret_not_valid  => "Secret has illegal characters.",
-    :repeat_secret     => "Repeat secret.",
+    :secret_too_short  => 'Secret is too short.',
+    :secret_max        => PPL,
+    :secret_too_long   => 'Secret is too long.',
+    :secret_accept     => '^[[:graph:]]*$',
+    :secret_reject     => '[\'"]',
+    :secret_not_valid  => 'Secret has illegal characters.',
+    :repeat_secret     => 'Repeat secret.',
 
     # Prompts
     :gibberish_prompt => 'Please randomly type at least $N words of gibberish:',

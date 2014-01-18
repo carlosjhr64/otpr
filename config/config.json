@@ -11,12 +11,12 @@
   "pin_min": 0,
 
   "comment": "What is the maximum pin length?",
-  "pin_max": 64,
+  "pin_max": 22,
 
   "comment": "Do we ensure the secret is valid as well?",
   "secret_validation": true,
   "secret_min": 0,
-  "secret_max": 64,
+  "secret_max": 40,
 
   "comment": "System clear should be called after every user entry... true or false?",
   "clear": false,

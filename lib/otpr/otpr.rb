@@ -7,7 +7,7 @@ module OTPR
       key   = DIGEST.digest(passphrase)
       @key  = OTPR::Key.new(key)
       xcs   = CHKSUM.hexdigest(passphrase)
-      wcs   = BaseConvert.new(:hexadecimal, :word).convert(xcs)
+      wcs   = BaseConvert.new(SBT, PNT).convert(xcs)
       @zin  = File.join yindir,  wcs
       @zang = File.join yangdir, wcs
     end
@@ -25,22 +25,22 @@ module OTPR
       File.unlink(@zang) if File.exist?(@zang)
     end
 
-    def set(plain, s=true)
+    def set(plain, s=STRIP)
       if s
         plain = plain.strip
-        while plain.length < 40
+        while plain.length < PPL
           plain+=' '
         end
       end
       encripted = @key.xor(plain)
-      yin   = OTPR::Entropy.computer.to(:qgraph)
+      yin   = OTPR::Entropy.computer.to(PPT)
       dyin  = DIGEST.digest(yin)
       yang  = OTPR::Key.new(dyin).xor(encripted)
       File.open(@zin,  'w', 0600){|f| f.write yin}
       File.open(@zang, 'w', 0600){|f| f.write yang}
     end
 
-    def get(s=true)
+    def get(s=STRIP)
       raise Error, :no_yin_yang unless exist?
       yin   = File.read @zin
       dyin  = DIGEST.digest(yin)
