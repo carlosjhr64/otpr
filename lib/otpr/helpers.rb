@@ -1,15 +1,15 @@
 module OTPR
 module Helpers
 
-def error_message
-  msg = $!.message
-  msg = (CONFIG[msg.to_sym] || msg).color(:red) unless CONFIG[:test_mode]
+def error_message(msg = $!.message, color=:red, test_mode=CONFIG[:test_mode])
+  msg = msg.to_s
+  msg = (CONFIG[msg.to_sym] || msg).color(color) unless test_mode
   STDERR.puts msg
 end
 
 def assert(b, comment)
   unless b # This is a sanity check.
-    STDERR.puts (CONFIG[comment] || comment).color(:red)
+    error_message(comment)
     exit 76 # ProtocolError: This error really should not be possible.
   end
 end
@@ -22,13 +22,9 @@ def assert_equal(a, b, comment)
   assert(a==b, comment)
 end
 
-def ask(question)
-  print question unless CONFIG[:batch]
+def ask(question, batch=CONFIG[:batch])
+  STDOUT.print question unless batch
   STDIN.gets.strip
-end
-
-def system_clear
-  system(CONFIG[:clear_command]) if CONFIG[:clear]
 end
 
 def user_pin(conf={})
@@ -53,6 +49,10 @@ def user_pin(conf={})
     puts conf[:repeat_pin] unless pin == pin0
   end
   return pin
+end
+
+def system_clear
+  system(CONFIG[:clear_command]) if CONFIG[:clear]
 end
 
 def get_pin
@@ -105,7 +105,7 @@ def get_salt(dir)
   File.read saltfile
 end
 
-def delete_files_in_dir(zin, zang)
+def delete_pads(zin, zang)
   Dir.glob(File.join(zin, '*')).each do |filename|
     # Don't know why there would be anything but regular file, but...
     if File.file?(filename)
@@ -117,29 +117,29 @@ def delete_files_in_dir(zin, zang)
           File.unlink(filename2)
         else
           # This is an alert for possible problems with the software.
-          STDERR.puts "Unpaired key deleted: #{name}".color(:green)
+          error_message("Unpaired key deleted: #{name}", :green)
         end
       end
     else
       # This is an alert for possible problems with the software.
-      STDERR.puts "Did not delete #{filename}".color(:green)
+      error_message("Did not delete: #{filename}", :green)
     end
   end
   zang_glob = Dir.glob(File.join(zang, '*'))
   if zang_glob.length == 0
     # This is an alert for possible problems with the software.
-    STDERR.puts "Zang did not have salt.".color(:green)
+    error_message(:zang_empty0, :green)
   elsif zang_glob.length == 1
     salt = zang_glob.shift
     if File.basename(salt) == 'salt'
       File.unlink salt
     else
       # This is an alert for possible problems with the software.
-      STDERR.puts "Zang's remaining file is not salt.".color(:green)
+      error_message(:zang_empty1, :green)
     end
   else
     # This is an alert that zang may be housing multiple medias.
-    STDERR.puts "Zang has keys not found in Zin.".color(:green)
+    error_message(:zang_multiple, :green)
   end
 end
 
