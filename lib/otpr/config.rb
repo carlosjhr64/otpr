@@ -126,6 +126,9 @@ More help: gem man otpr
     :pin_inconsistent   => 'Pin is missing a key.',
     :pin_does_not_exist => 'Pin does not exist.',
     :pin_exist          => 'Pin exist.',
+    :zang_empty0        => 'Zang did not have salt.',
+    :zang_empty1        => 'Zang last file is not salt.',
+    :zang_multiple      => 'Zang has keys not found in Zin.',
 
     # Status Responses
     :ok           => 'OK',
