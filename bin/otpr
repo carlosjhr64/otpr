@@ -46,7 +46,7 @@ begin
   # Deletes all files in media, and its' pair in cache.
   if OPTIONS[:erase]
     if ask(CONFIG[:confirm_erase])==CONFIG[:y]
-      delete_files_in_dir(MEDIA_CACHE, USERSPACE.cachedir)
+      delete_pads(MEDIA_CACHE, USERSPACE.cachedir)
       puts CONFIG[:ok]
     else
       puts CONFIG[:cancelled]
