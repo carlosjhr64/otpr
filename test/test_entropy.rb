@@ -108,5 +108,5 @@ class Test_Entropy < Test::Unit::TestCase
     assert_equal 0, qa=~/^[[:graph:]]{40}$/
   end
 
-  # TODO: use cucumber to test use and redundant
+  # TODO: test Entropy.user and test Entropy.redundant
 end
