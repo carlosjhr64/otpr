@@ -59,7 +59,7 @@ class Test_Entropy < Test::Unit::TestCase
     assert_equal 0, min
     assert_equal 15, max
     # 66 ~ 3*Sqrt[480]
-    assert_in_delta 480, a.inject(0,:+), 66
+    assert_in_delta 480, a.inject(0,:+), 66, 'Small chance of failure'
     qa = a.to(:qgraph)
     wa = a.to(:word)
     assert_equal 0, qa=~/^[[:graph:]]+$/
@@ -77,7 +77,7 @@ class Test_Entropy < Test::Unit::TestCase
     assert_equal 0, min
     assert_equal 15, max
     # 66 ~ 3*Sqrt[480]
-    assert_in_delta 480, a.inject(0,:+), 66
+    assert_in_delta 480, a.inject(0,:+), 66, 'Small chance of failure'
     qa = a.to(:qgraph)
     wa = a.to(:word)
     assert_equal 0, qa=~/^[[:graph:]]+$/
@@ -99,7 +99,7 @@ class Test_Entropy < Test::Unit::TestCase
     assert_equal 0, min
     assert_equal 15, max
     # 66 ~ 3*Sqrt[480]
-    assert_in_delta 480, a.inject(0,:+), 66
+    assert_in_delta 480, a.inject(0,:+), 66, 'Small chance of failure'
     qa = a.to(:qgraph)
     wa = a.to(:word)
     assert_equal 0, qa=~/^[[:graph:]]+$/
