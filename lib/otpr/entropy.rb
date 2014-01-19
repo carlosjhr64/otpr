@@ -45,17 +45,21 @@ module OTPR
       return computer
     end
 
+    def self.words(words)
+      string = DIGEST.hexdigest(words.join(' ')).chars.map{|h|h.to_i(SBS)}
+      string.extend Convertable
+      return string
+    end
+
     def self.user(conf={})
       conf.extend OTPR::Config
-      user = [] # Entropy from user
-      while (user.length) < WORDS
-        puts conf[:gibberish_prompt].gsub(/\$N/, (WORDS - user.length).to_s)
-        user += ((conf[:echo])? STDIN.gets : STDIN.noecho(&:gets)).strip.split(/\s+/)
-        user.uniq!
+      words = [] # Entropy from user
+      while (words.length) < WORDS
+        puts conf[:gibberish_prompt].gsub(/\$N/, (WORDS - words.length).to_s)
+        words += ((conf[:echo])? STDIN.gets : STDIN.noecho(&:gets)).strip.split(/\s+/)
+        words.uniq!
       end
-      user = DIGEST.hexdigest(user.join(' ')).chars.map{|h|h.to_i(SBS)}
-      user.extend Convertable
-      return user
+      return Entropy.words(words)
     end
 
     def self.redundant
