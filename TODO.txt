@@ -6,8 +6,6 @@ TODO:
 
 == File List
 
-TODO:	test Entropy.user and test Entropy.redundant
-	test/test_entropy.rb, #111
 TODO:	test Helpers#assert, Helpers#refute, Helpers#assert_equal
 	test/test_helpers.rb, #112
 TODO:	test Helpers#system_clear, Helpers#get_pin, Helpers#user_secret, Helpers#computer_random

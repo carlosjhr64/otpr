@@ -95,11 +95,10 @@ class Test_Entropy < Test::Unit::TestCase
     assert_equal NIBBLES, a.length
     assert_equal 64, a.length
     min, max = a.minmax
-    # There's a small statistical chance any of these will fail.
     assert_equal 0, min
     assert_equal 15, max
     # 66 ~ 3*Sqrt[480]
-    assert_in_delta 480, a.inject(0,:+), 66, 'Small chance of failure'
+    assert_in_delta 480, a.inject(0,:+), 66
     qa = a.to(:qgraph)
     wa = a.to(:word)
     assert_equal 0, qa=~/^[[:graph:]]+$/
@@ -108,5 +107,4 @@ class Test_Entropy < Test::Unit::TestCase
     assert_equal 0, qa=~/^[[:graph:]]{40}$/
   end
 
-  # TODO: test Entropy.user and test Entropy.redundant
 end
