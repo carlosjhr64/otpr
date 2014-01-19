@@ -204,8 +204,6 @@ class Test_Helpers < Test::Unit::TestCase
     assert_equal 'abcd', pin
   end
 
-  # TODO: test Helpers' system_clear, get_pin, user_secret, computer_random, get_secret.
-
   def test_014_get_salt
     Stub.clear
     tmpdir = Dir.mktmpdir

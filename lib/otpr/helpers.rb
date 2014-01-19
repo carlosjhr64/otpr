@@ -27,6 +27,12 @@ def ask(question, batch=CONFIG[:batch])
   STDIN.gets.strip
 end
 
+def stdin_gets(conf={})
+  conf.extend Config
+  pin = (conf[:echo])? STDIN.gets : STDIN.noecho(&:gets)
+  (STRIP)? pin.strip : pin.chomp
+end
+
 def user_pin(conf={})
   conf.extend Config
   accept, reject = Regexp.new(conf[:pin_accept]), Regexp.new(conf[:pin_reject])
@@ -37,8 +43,7 @@ def user_pin(conf={})
     pin, pin0, length = pin0, nil, -1
     until (length >= min) and (length <= max) and (pin0 =~ accept) and !(pin0 =~ reject)
       print conf[:enter_pin]
-      pin0 = (conf[:echo])? STDIN.gets : STDIN.noecho(&:gets)
-      pin0 = (STRIP)? pin0.strip : pin0.chomp
+      pin0 = stdin_gets(conf)
       puts unless conf[:echo]
       length = pin0.length
       break unless conf[:pin_validation]
@@ -56,7 +61,7 @@ def system_clear
 end
 
 def get_pin
-  pin = (CONFIG[:batch])? STDIN.gets.chomp : user_pin
+  pin = (CONFIG[:batch])? stdin_gets : user_pin
   system_clear
   return pin
 end
@@ -64,7 +69,7 @@ end
 def user_secret
   secret = nil
   if CONFIG[:batch]
-    secret = STDIN.gets.strip
+    secret = stdin_gets
   else
     options = {
       :enter_pin      => CONFIG[:enter_secret],

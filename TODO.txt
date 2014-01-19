@@ -1,11 +1,8 @@
 TODO:
 
-* write tests
 * write man page
 * publish on rubygems
 
 == File List
 
-TODO:	test Helpers' system_clear, get_pin, user_secret, computer_random, get_secret.
-	test/test_helpers.rb, #207
 
