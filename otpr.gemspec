@@ -29,6 +29,7 @@ README.rdoc
 TODO.txt
 bin/otpr
 config/config.json
+examples/assertion_testing
 features/assertion.feature
 features/main.feature
 features/options.feature
@@ -53,6 +54,7 @@ test/test_version.rb
   s.executables << 'otpr'
   s.add_runtime_dependency 'base_convert', '~> 0.0', '>= 0.0.1'
   s.add_runtime_dependency 'rainbow', '~> 1.99', '>= 1.99.1'
+  s.add_development_dependency 'help_parser', '~> 1.2', '>= 1.2.0'
   s.add_development_dependency 'test-unit', '~> 2.5', '>= 2.5.5'
   s.requirements << 'system: linux/bash'
   s.requirements << 'bash in development: GNU bash, version 4.2.25(1)-release (x86_64-pc-linux-gnu)'

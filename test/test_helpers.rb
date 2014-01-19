@@ -2,6 +2,7 @@
 require 'digest'
 require 'timeout'
 require 'tmpdir'
+require 'securerandom'
 
 # Gems
 require 'test/unit'
@@ -10,6 +11,7 @@ require 'base_convert'
 
 # Rigs...
 require 'otpr/config'
+require 'otpr/entropy'
 
 # THE LIBRARY FILE BEING TESTED
 require 'otpr/helpers'
@@ -202,10 +204,18 @@ class Test_Helpers < Test::Unit::TestCase
     assert_equal 'abcd', pin
   end
 
-  # TODO: test Helpers#system_clear, Helpers#get_pin, Helpers#user_secret, Helpers#computer_random
-  # TODO: test Helpers#get_secret, Helpers#get_salt
+  # TODO: test Helpers' system_clear, get_pin, user_secret, computer_random, get_secret.
 
-  def test_013_delete_pads
+  def test_014_get_salt
+    Stub.clear
+    tmpdir = Dir.mktmpdir
+    salt = Mock.get_salt(tmpdir)
+    assert_equal 1, Stub.count
+    refute_nil Stub.firsts=~/Writting.*salt/
+    refute_nil salt=~/^[[:graph:]]{40}$/
+  end
+
+  def test_014_delete_pads
     Stub.clear
     test_mode, CONFIG[:test_mode] = CONFIG[:test_mode], true
 

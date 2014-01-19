@@ -100,7 +100,7 @@ def get_salt(dir)
   saltfile = File.join dir, 'salt'
   unless File.exist? saltfile
     STDERR.puts (CONFIG[:writting] + saltfile).color(:green)
-    File.open(saltfile, 'w', 0600){|f| f.write Entropy.computer.to(:qgraph)}
+    File.open(saltfile, 'w', 0600){|f| f.write Entropy.computer.to(:qgraph).pad!(40)}
   end
   File.read saltfile
 end
