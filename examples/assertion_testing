@@ -1,0 +1,64 @@
+#!/usr/bin/env ruby
+require 'help_parser'
+require 'otpr'
+
+NAME = File.basename $0
+HELP = <<HELP
+Usage: #{NAME}
+  --assert=01,COMMENT
+  --assert=01,COMMENT
+  --refute=01,COMMENT
+  --refute=01,COMMENT
+  --assert_equal=a,b,COMMENT
+HELP
+
+begin
+  OPTIONS = HELP_PARSER::HelpParser.new('1.0.0', HELP)
+  unless [:assert,:refute,:assert_equal].inject(false){|b,k| b^OPTIONS[k]}
+    OPTIONS.usage_error("Need assert, refute, or assert_equal.") 
+  end
+
+  if OPTIONS[:assert]
+    choice = OPTIONS[:assert]
+    unless choice.class == Array and b = choice.shift and comment = choice.shift and [0,1].include?(b)
+      OPTIONS.usage_error('Expected --assert=0,comment or --assert=1,comment')
+    end
+    b = (b==1) # to boolean
+    extend OTPR::Helpers
+    assert(b, comment)
+    puts 'OK'
+    exit
+  end
+
+  if OPTIONS[:refute]
+    choice = OPTIONS[:refute]
+    unless choice.class == Array and b = choice.shift and comment = choice.shift and [0,1].include?(b)
+      OPTIONS.usage_error('Expected --refute=0,comment or --refute=1,comment')
+    end
+    b = (b==1) # to boolean
+    extend OTPR::Helpers
+    refute(b, comment)
+    puts 'OK'
+    exit
+  end
+
+  if OPTIONS[:assert_equal]
+    choice = OPTIONS[:assert_equal]
+    unless choice.class == Array and a = choice.shift and b = choice.shift and comment = choice.shift
+      OPTIONS.usage_error('Expected --assert_equal=a,b,comment')
+    end
+    extend OTPR::Helpers
+    assert_equal(a, b, comment)
+    puts 'OK'
+    exit
+  end
+
+  STDERR.puts "Unexpected Program Flow"
+  exit 70
+
+rescue HELP_PARSER::UsageException
+  puts $!.message
+rescue HELP_PARSER::UsageError
+  STDERR.puts $!.message
+  exit 64
+end

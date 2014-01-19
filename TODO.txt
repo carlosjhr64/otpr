@@ -6,10 +6,8 @@ TODO:
 
 == File List
 
-TODO:	test Helpers#assert, Helpers#refute, Helpers#assert_equal
-	test/test_helpers.rb, #112
 TODO:	test Helpers#system_clear, Helpers#get_pin, Helpers#user_secret, Helpers#computer_random
-	test/test_helpers.rb, #207
+	test/test_helpers.rb, #205
 TODO:	test Helpers#get_secret, Helpers#get_salt
-	test/test_helpers.rb, #208
+	test/test_helpers.rb, #206
 

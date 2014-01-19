@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 # Gems
-require 'rainbow'
 require 'help_parser'
 require 'user_space'
 

@@ -109,8 +109,6 @@ class Test_Helpers < Test::Unit::TestCase
     assert_equal "\e[31mOK\e[0m", Stub.firsts, '"OK" in caps, colored red.'
   end
 
-  # TODO: test Helpers#assert, Helpers#refute, Helpers#assert_equal
-
   def test_005_ask
     Stub.clear
     STDIN.puts ' Y '
