@@ -1,60 +1,206 @@
-Let F[x] be one way functions of x.
-Let x*F be invertable methods on x.
-So if y=x*F, then x=y/F.
-But if y=F[x], there's no way of getting x from y.
+#!ruby!
+# One should be able to follow along using irb.
+# The purpose of the code here is show math.
+# It's not necessarily the actual code.
+# What is Entropy?
 
-p  :: Pin: typically 3 to 7 characters.
-s  :: Salt: 256 bits (64 nibbles) * 2.
-ps :: Passphrase
+  class Entropy
+    def initialize(bits=256)
+      @entropy = bits.times.inject([]){|a,i|a<<rand(2)}.join
+    end
+  end
+  E = Entropy
 
-  ps = s+p # String concatanation
+# Because of the dual nature of split pad files,
+# in the code I use the terms Yin and Yang.
+# Yin refers to the removable media.
+#    /media/KINGSTON/.otpr
+# Yang refers to the disk cache.
+#   ~/.cache/otpr
+# The yin/yang salts are:
 
-x  :: Checksum of passphrase
-X  :: MD5 Digestor: creates 128 bit digests.
+   s0 = E.new # Looks like 10000010101101100111...
+   s1 = E.new
 
-  x = X[ps]
+# These have 256 bits of entropy.
+# That a lot of bits.  Let's use hexadecimal notation.
+# Coverting to and from hexadecimal is "easy".
+# That is, it's a reversible process.
+# To show that in notation, let's use the * operator.
 
-*W :: Converts to [\w][^_] representation, suitable for filenames.
-wx :: The word representation of x.
+  module Convertible
+    def *(n)
+      e = @entropy.to_i(2).to_s(n)
+    end
+  end
+  E.include Convertible
 
-  wx = x*W = X[ps]*W = X[s+p]*W
+# Hexadecimal notation is madeup of 16 symbols.
 
-d  :: Digest of passphrase.
-D  :: SHA256 Digestor: creates 256 bit digests.
+  H = 16
 
-  d = D[ps] = D[s+p]
+# So to refer to the hex represention of s0 and s1, do:
 
-c  :: Secret: variable length.
-e  :: Encripted secret.
+  s0*H # will look like b338f69415...
+  s1*H
 
-  e = d^c # xor encription
+# Just to show that this is reversible:
 
-Note that if the size of c is comparable to d, then
-we essentially have a one time pad, unless the salt is compromised.
-With a compromised salt, e is still guarded by the pin:
+  (s0*H).to_i(16).to_s(2) # Looks like 1000001...
 
-  e = D[s+p]^c
+# In the code, I use BaseConvert because
+# it allows me to use arbitrary symbols
+# and base size greater than 36.
+# Let Q be a base 91 representation.
+# Let W be a base 62 representation.
 
-OTPR uses the same salt for all pins.
-It is stored in a secured cache directory in the computer.
-When a user enters a pin,
-the existance of files named wx indicates we have a secret
-already stored for that pin.
-To further secure the secrets,
-we'll re-encript with random keys stored in removable media.
+  Q = 91
+  W = 62
 
-qy :: A random graph passphrase representing about 256 bits of entropy(yin in the code).
-g  :: The re-encripted secret(yang in the code).
+# You'll get an "invalid radix 91" error
+# if you try to convert to these bases with the simple code above
+# because there's no standard way to represent these.
+# As shown, we can go up to 36:
 
-  g = D[qy]^e = D[qy]^(D[s+p]^c)
+  s0*36 # looks like 24e5iq2s...
 
-To say more about qy, consider y to be about 256 random bits.
+# Just to show I ain't cheatin'...
 
-y  :: random bits
-*Q :: Converts to [:graph:][^'"] representation, suitable for passphrases.
+  require 'base_convert'
 
-  qy = y*Q
+  module Convertible
+    def *(n)
+      case n
+      when 91, :qgraph
+        e = @entropy.to_i(2).to_s(16)
+        BaseConvert.new(:hex,:qgraph).convert(e)
+      when 62, :word
+        e = @entropy.to_i(2).to_s(16)
+        BaseConvert.new(:hex,:word).convert(e)
+      else
+        @entropy.to_i(2).to_s(n)
+      end
+    end
+  end
+  E.include Convertible
 
-Warning:
-otpr is meant to be used to store and retrieve long passwords using short pins.
-It's not meant to be used to encript messages that are much larger than 256 bits.
+  s0*Q # looks like #RaRVL<Y...
+  s0*W # looks like KBk48Wqa...
+
+# s0*Q and s1*Q is what's stored in the salt files.
+# This makes it easier to inspect.
+# The combined salt is:
+
+  s = s0*Q + s1*Q
+
+# The passphrase is the salted pin, which is given by the user.
+# I'll denote the pin as p, and the passphrase as w:
+
+  p = 'abc' # whatever the user says
+  w = s0*Q + s1*Q + p
+
+# BTW, +  and * behave as expected for the right choice of base(2**n).
+# With H you have the algebra. Not with Q.
+# But I'd have to overload + to show that.
+# According to Wikipedia's
+# *Paswords strength[http://en.wikipedia.org/wiki/Password_strength]*
+# entry:
+#   Due to currently understood limitations from fundamental physics,
+#   there is no expectation that any digital computer (or combination)
+#   will be capable of breaking 256-bit encryption via a brute-force attack.
+# I'll just keep 256 bits of entropy.
+# For this purpose I use SHA256:
+
+  require 'digest'
+  D = Digest::SHA256
+  d0 = D.digest w
+  d0.length # => 32
+
+# The digest of w is a binary string of length 32.
+# This equivalent to 256 bits of entropy.
+
+  2**256 == 256**32 # => true
+
+# Expanded out, d0 is:
+
+  d0 = D.digest( s0*Q + s1*Q + p )
+
+# I need a key to encript the secret.
+# Encription will be a simple xor, which
+# is fine for a secret about the size of the key.
+# Because passwords typically can't use the full 256 ascii set,
+# a graph password would have to be at least 40 characters long
+# to contain about 256 bits of entropy, which is longer than d0.
+# According to the Password strength article in Wikipedia,
+# a *Case sensitive Latin alphabet* password would need to be 45 characters long.
+# I just need a key a little bigger that d.  So I add MD5.
+
+  C  = Digest::MD5
+  d1 = C.digest( s )
+  k  = d0 + d1
+  k.length == 48 # => true
+
+# Now my key, k, has more than 256 bits of entropy, but that's OK.
+# For concise notation, recognize that digest are thought of hashes:
+
+  module HashNotation
+    def [](key)
+      self.digest(key)
+    end
+  end
+  C.extend HashNotation
+  D.extend HashNotation
+
+# So d expanded out is:
+
+  k = D[s0*Q + s1*Q + p] + C[s0*Q + s1*Q + p]
+  k.length == 48 # => true
+
+# Given our plain text secret, s:
+
+  s = 'Top Secret Password!'
+
+# We want to *xor* with the key:
+
+  module Xor
+    def ^(secret, i=-1)
+      secret.bytes.inject(''){|plain, byte| plain+(byte^self.bytes[(i+=1)%length]).chr}
+    end
+  end
+  k.extend Xor
+
+# Now we can encript the secret:
+
+  c = k^s  # => looks like S{)\xABI\x02...
+  k^c      # => 'Top Secret Password!'
+  s == k^c # => true!
+
+# Tada!
+# Can't actually run the following because
+# the objects don't automatically extend themselves, but
+# expanded it all out it is:
+#   c = (D[s0*Q + s1*Q + p] + C[s0*Q + s1*Q + p])^s
+#   s == (D[s0*Q + s1*Q + p] + C[s0*Q + s1*Q + p])^c # => true
+# To store the encripted secret, and allow  the use of multiple pins,
+# I need a filename, f, that's based on the pin, but
+# that cannot be reversed back to the pin.
+#
+#  f = d1*W  # d1 is a digest object, so it dont know about *.
+#
+# Again, objects don't extend themselves, but
+# Expanded it out:
+#
+#  f = C[s0*Q + s1*Q + p]*W
+#
+# I save the secret in the cache directory under the name of f.
+# But what if at some point, because the salts and pin don't change,
+# the passphrase to the secret is compromised?
+# The p(pin) is in your head, s0(Yin's salt) is in removable media, and
+# s1(Yang's salt) is in a user only readable directory.
+# How is the passphrase going to be compromised?  LOL.
+# But let's make it as near impossible as possible!  :P
+# I re-encript with a new random key and save the key in the removable media under f.
+# The --regen option allows one to re-generate the two files.
+# The regenaration does not need to know the passphase.
+# So if at anytime any either Yin or Yang is compromised,
+# just regenarate all the pads.
