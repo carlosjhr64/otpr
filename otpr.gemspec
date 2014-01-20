@@ -48,6 +48,7 @@ test/test_entropy.rb
 test/test_hard_ones.rb
 test/test_helpers.rb
 test/test_key.rb
+test/test_manually.rb
 test/test_otpr.rb
 test/test_version.rb
   )
@@ -61,5 +62,6 @@ test/test_version.rb
   s.requirements << 'touch in development: touch (GNU coreutils) 8.13'
   s.requirements << 'rm in development: rm (GNU coreutils) 8.13'
   s.requirements << 'ln in development: ln (GNU coreutils) 8.13'
+  s.requirements << 'ruby in development: ruby 2.1.0p0 (2013-12-25 revision 44422) [x86_64-linux]'
 
 end
