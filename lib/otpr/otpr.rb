@@ -2,7 +2,7 @@ module OTPR
   class Otpr
     def self.digest(passphrase)
       digest = DIGEST.digest(passphrase)
-      digest + CHKSUM.digest(digest)
+      digest + CHKSUM.digest(passphrase)
     end
 
     attr_reader :key, :zin, :zang

@@ -31,7 +31,7 @@ class Test_Otpr < Test::Unit::TestCase
   def test_002_attributes
     otpr = Otpr.new('A_Passphrase', ZIN, ZANG)
     digest = DIGEST.digest('A_Passphrase')
-    key = digest + CHKSUM.digest(digest)
+    key = digest + CHKSUM.digest('A_Passphrase')
     chksum = BaseConvert.new(:hex, :word).convert(CHKSUM.hexdigest('A_Passphrase'))
     assert_equal key, otpr.key
     assert_equal File.join(ZIN, chksum),  otpr.zin

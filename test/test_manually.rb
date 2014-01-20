@@ -46,7 +46,7 @@ continue?
 puts 'Now going to set batch mode, clear, and no-echo.'
 puts 'Just blindly enter 123, and it should clear and show the previous secret.'
 system('ruby -I ./lib ./bin/otpr --read --batch --clear --no-echo')
-print 'So all you see now is the secret... right? '
+print 'So all you see now is the secret... right(Y/n)? '
 continue?
 print 'One last chance to flunk.  Pass?(Y/n) '
 continue?
