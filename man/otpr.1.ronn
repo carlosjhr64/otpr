@@ -1,13 +1,45 @@
-otpr(1) -- get long passwords from short pins
-=============================================
+otpr(1) - Long passwords from short pins.
+=========================================
 
 ## SYNOPSIS
 
+`otpr` <options><br>
+`otpr` `--create`<br>
+`otpr` `--read`<br>
+`otpr` `--update`<br>
+`otpr` `--delete`<br>
+
 ## DESCRIPTION
 
-## FILES
+**otpr** maintains short pins for long passwords.
 
 ## OPTIONS
 
+* `-c`, `--create`:
+  Create blah blah blah.
+
 ## EXAMPLES
 
+## RESPONSES
+
+Or maybe this is a sub-heading elsewhere?
+
+## EXIT STATUS
+
+Or maybe this is a sub-heading elsewhere?
+
+## FILES
+
+`~/.config/otpr/config.json`
+
+## ENVIROMENT
+
+## BUGS
+
+## LICENSE
+
+## AUTHOR
+
+## COPYRIGHT
+
+## SEE ALSO
