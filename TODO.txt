@@ -1,5 +1,6 @@
 TODO:
 
+* auto regenerate all consistent pads
 * write man page
 * publish on rubygems
 
