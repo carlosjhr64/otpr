@@ -151,7 +151,7 @@
   C.extend HashNotation
   D.extend HashNotation
 
-# So d expanded out is:
+# So the key, k, expanded out is:
 
   k = D[s0*Q + s1*Q + p] + C[s0*Q + s1*Q + p]
   k.length == 48 # => true
