@@ -34,11 +34,13 @@ module OTPR
 
     # The help text
     :help => <<-HELP,
+Long passwords from short pins.
+
 Usage: otpr [options]
+
 Options:
   -v --version
   -h --help
-
   Actions:
   -c --create  Create a new pin-password pair.
   -r --read    Read a pin's password.
@@ -48,18 +50,15 @@ Options:
   -C --copy    Copy pin content to a new pin.
   -M --move    Move pin content to a new pin.
   --erase      Deletes all pins.
-
   Modifiers:
-  -R --random     Create a random password.
-  -b --batch      Turns off interactive mode.
-  -l --clear      Clears screen after pin entries.
-  -g --regen      Regenerates pad.
+  -R --random  Create a random password.
+  -b --batch   Turns off interactive mode.
+  -l --clear   Clears screen after pin entries.
+  -g --regen   Regenerates pad.
   -e --echo --no-echo.
   -w --overwrite --no-overwrite.
-
   -P --pin-validation --no-pin-validation
   -S --secret-validation --no-secret-validation
-
   Where is the flash drive?:
   --media='/removable-media-directory/'
 

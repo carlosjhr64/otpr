@@ -1,0 +1,13 @@
+otpr(1) -- get long passwords from short pins
+=============================================
+
+## SYNOPSIS
+
+## DESCRIPTION
+
+## FILES
+
+## OPTIONS
+
+## EXAMPLES
+
