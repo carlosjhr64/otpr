@@ -246,7 +246,7 @@
    s == (D[s0*Q + s1*Q + p] + C[s0*Q + s1*Q + p])^c
    # => true
 
-# To store the encripted secret, and allow  the use of multiple pins,
+# To store the encripted secret, and allow the use of multiple pins,
 # I need a filename, f, that's based on the pin, but
 # that cannot be reversed back to the pin.
 #
