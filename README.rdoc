@@ -10,8 +10,8 @@ Use short pins to access your long passwords.
 == FEATURES:
 
 * Passwords only accessable when removable media is present.
-* Passwords are stored as two splitted keys encripted by it's pin.
-* One key is stored in removeable media, the other in a secured cache directory.
+* Passwords are double encripted: once based on your salted pin, and once again by key in removable media.
+* Automatically changes keys (re-encripts) on request.
 
 == HELP:
 
