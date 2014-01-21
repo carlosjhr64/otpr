@@ -15,6 +15,7 @@ Use short pins to access your long passwords.
 
 == HELP:
 
+   Long passwords from short pins.
    Usage: otpr [options]
    Options:
      -v --version
@@ -28,11 +29,15 @@ Use short pins to access your long passwords.
      -C --copy    Copy pin content to a new pin.
      -M --move    Move pin content to a new pin.
      --erase      Deletes all pins.
+     --regen-all  Re-encripts all pads.
+     --remove-unpaired
+     --remove-unpaired-keys
+     --remove-unpaired-files
      Modifiers:
-     -R --random     Create a random password.
-     -b --batch      Turns off interactive mode.
-     -l --clear      Clears screen after pin entries.
-     -g --regen      Regenerates pad.
+     -R --random  Create a random password.
+     -b --batch   Turns off interactive mode.
+     -l --clear   Clears screen after pin entries.
+     -g --regen   Re-encripts pad.
      -e --echo --no-echo.
      -w --overwrite --no-overwrite.
      -P --pin-validation --no-pin-validation
