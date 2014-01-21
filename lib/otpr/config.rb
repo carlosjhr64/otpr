@@ -50,11 +50,15 @@ Options:
   -C --copy    Copy pin content to a new pin.
   -M --move    Move pin content to a new pin.
   --erase      Deletes all pins.
+  --regen-all  Re-encripts all pads.
+  --remove-unpaired
+  --remove-unpaired-keys
+  --remove-unpaired-files
   Modifiers:
   -R --random  Create a random password.
   -b --batch   Turns off interactive mode.
   -l --clear   Clears screen after pin entries.
-  -g --regen   Regenerates pad.
+  -g --regen   Re-encripts pad.
   -e --echo --no-echo.
   -w --overwrite --no-overwrite.
   -P --pin-validation --no-pin-validation
@@ -111,6 +115,7 @@ More help: gem man otpr
     :gibberish_prompt => 'Please randomly type at least $N words of gibberish:',
     :confirm_delete   => 'Delete(Y/n)?: ',
     :confirm_erase    => 'Erase All Pins(Y/n)?: ',
+    :confirm_remove_unpaired => 'Are you sure(Y/n)?: ',
     # What must 'yes' be on confirmations?
     :y => 'Y',
 

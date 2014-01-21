@@ -105,31 +105,69 @@ def get_salt(dir)
   saltfile = File.join dir, 'salt'
   unless File.exist? saltfile
     STDERR.puts (CONFIG[:writting] + saltfile).color(:green)
-    File.open(saltfile, 'w', 0600){|f| f.write Entropy.computer.to(:qgraph).pad!(40)}
+    File.open(saltfile, 'w', 0600) do |f|
+      f.write Entropy.computer.to(:qgraph).pad!(40)
+    end
   end
   File.read saltfile
 end
 
-def delete_pads(zin, zang)
+def files_in(zin)
   Dir.glob(File.join(zin, '*')).each do |filename|
     # Don't know why there would be anything but regular file, but...
     if File.file?(filename)
-      File.unlink(filename)
       name = File.basename(filename)
-      unless name == 'salt'
-        filename2 = File.join(zang, name)
-        if File.exist?(filename2)
-          File.unlink(filename2)
-        else
-          # This is an alert for possible problems with the software.
-          error_message("Unpaired key deleted: #{name}", :green)
-        end
-      end
+      next if name=='salt'
+      yield filename, name
     else
       # This is an alert for possible problems with the software.
-      error_message("Did not delete: #{filename}", :green)
+      error_message("Skipping: #{filename}", :green)
     end
   end
+end
+
+def delete_unpaired(zin, zang)
+  files_in(zin) do |filename, name|
+    filename2 = File.join(zang, name)
+    unless File.exist?(filename2)
+      File.unlink filename
+    end
+  end
+end
+
+def regen_pads(zin, zang)
+  files_in(zin) do |filename, name|
+    filename2 = File.join(zang, name)
+    if File.exist?(filename2)
+      encripted = Otpr.get(filename, filename2)
+      Otpr.set(filename, filename2, encripted)
+      encripted2 = Otpr.get(filename, filename2)
+      assert_equal(encripted, encripted2, :could_not_set)
+    else
+      # This is an alert for possible problems with the software.
+      error_message("Unpaired key: #{name}", :green)
+    end
+  end
+end
+
+def delete_pads(zin, zang)
+  files_in(zin) do |filename, name|
+    File.unlink(filename)
+    filename2 = File.join(zang, name)
+    if File.exist?(filename2)
+      File.unlink(filename2)
+    else
+      # This is an alert for possible problems with the software.
+      error_message("Unpaired key deleted: #{name}", :green)
+    end
+  end
+  zin_salt = File.join(zin,'salt')
+  if File.exist?(zin_salt)
+    File.unlink(zin_salt)
+  else
+    error_message("Media did not have salt.", :green)
+  end
+
   zang_glob = Dir.glob(File.join(zang, '*'))
   if zang_glob.length == 0
     # This is an alert for possible problems with the software.

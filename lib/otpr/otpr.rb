@@ -39,22 +39,30 @@ module OTPR
       return plain
     end
 
-    def set(plain, strip=STRIP)
-      plain     = Otpr.pad(plain) if strip
-      encripted = @key.xor(plain)
+    def self.set(zin, zang, encripted)
       yin       = Entropy.computer.to(PPT).pad!(PPL)
       dyin      = Otpr.digest(yin)
       yang      = Key.new(dyin).xor(encripted)
-      File.open(@zin,  'w', 0600){|f| f.write yin}
-      File.open(@zang, 'w', 0600){|f| f.write yang}
+      File.open(zin,  'w', 0600){|f| f.write yin}
+      File.open(zang, 'w', 0600){|f| f.write yang}
+    end
+
+    def set(plain, strip=STRIP)
+      plain     = Otpr.pad(plain) if strip
+      encripted = @key.xor(plain)
+      Otpr.set(@zin, @zang, encripted)
+    end
+
+    def self.get(zin, zang)
+      yin   = File.read zin
+      dyin  = Otpr.digest(yin)
+      yang  = File.read zang
+      return Key.new(dyin).xor(yang)
     end
 
     def get(strip=STRIP)
       raise Error, :no_yin_yang unless exist?
-      yin   = File.read @zin
-      dyin  = Otpr.digest(yin)
-      yang  = File.read @zang
-      encripted = Key.new(dyin).xor(yang)
+      encripted = Otpr.get(@zin, @zang)
       plain = @key.xor(encripted)
       plain.strip! if strip
       return plain

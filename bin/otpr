@@ -24,7 +24,11 @@ end
 begin
   OPTIONS = HELP_PARSER::HelpParser.new(VERSION, CONFIG[:help])
   # User must state intent
-  unless [:c,:r,:u,:d,:s,:C,:M,:erase].inject(false){|b,k| b^OPTIONS[k]}
+  unless [
+    :c,:r,:u,:d,:s,
+    :C,:M, :erase,:regen_all,
+    :remove_unpaired, :remove_unpaired_keys, :remove_unpaired_files,
+    ].inject(false){|b,k| b^OPTIONS[k]}
     OPTIONS.usage_error(:choose_one) 
   end
   # OPTIONS overwrites keys in CONFIG
@@ -39,8 +43,17 @@ begin
   Dir.mkdir(MEDIA_CACHE, 0700) unless File.exist? MEDIA_CACHE
   assert File.directory?(MEDIA_CACHE), "Not a directory:#{MEDIA_CACHE}"
 
-  # Writes a random salt if needed.  Reads the salt.  
-  SALT = get_salt(MEDIA_CACHE) + get_salt(USERSPACE.cachedir)
+  a, k, f = OPTIONS[:remove_unpaired], OPTIONS[:remove_unpaired_keys], OPTIONS[:remove_unpaired_files]
+  if a or k or f
+    if ask(CONFIG[:confirm_remove_unpaired])==CONFIG[:y]
+      delete_unpaired(MEDIA_CACHE, USERSPACE.cachedir) if a or k
+      delete_unpaired(USERSPACE.cachedir, MEDIA_CACHE) if a or f
+      puts CONFIG[:ok]
+    else
+      puts CONFIG[:cancelled]
+    end
+    exit
+  end
 
   # Deletes all files in media, and its' pair in cache.
   if OPTIONS[:erase]
@@ -52,6 +65,16 @@ begin
     end
     exit
   end
+
+  # Re-encripts all pads
+  if OPTIONS[:regen_all]
+    regen_pads(MEDIA_CACHE, USERSPACE.cachedir)
+    puts CONFIG[:ok]
+    exit
+  end
+
+  # Writes a random salt if needed.  Reads the salt.
+  SALT = get_salt(MEDIA_CACHE) + get_salt(USERSPACE.cachedir)
 
   # Otp object from pin. Verify that it has the 2 split keys (or none).
   otpr = Otpr.new(SALT+get_pin, MEDIA_CACHE, USERSPACE.cachedir)

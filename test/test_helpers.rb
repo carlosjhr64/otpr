@@ -229,16 +229,18 @@ class Test_Helpers < Test::Unit::TestCase
 
     # Deleting empty zin and zang (zang unsalted)
     Mock.delete_pads(zin, zang)
-    assert_equal 1, Stub.count
-    assert_equal 'zang_empty0', Stub.firsts
+    assert_equal 2, Stub.count
+    refute_nil Stub.firsts=~/no.*salt/
+    assert_equal 'zang_empty0', Stub.lasts
 
     Stub.clear
 
     # Deleting empty zin, zang with 1 unpaired file (zang unsalted)
     system("touch #{zang}/abc")
     Mock.delete_pads(zin, zang)
-    assert_equal 1, Stub.count
-    assert_equal 'zang_empty1', Stub.firsts
+    assert_equal 2, Stub.count
+    refute_nil Stub.firsts=~/no.*salt/
+    assert_equal 'zang_empty1', Stub.lasts
     assert system("rm #{zang}/abc")
 
     Stub.clear
@@ -247,8 +249,9 @@ class Test_Helpers < Test::Unit::TestCase
     system("touch #{zin}/abc")
     system("touch #{zang}/abc")
     Mock.delete_pads(zin, zang)
-    assert_equal 1, Stub.count
-    assert_equal 'zang_empty0', Stub.firsts
+    assert_equal 2, Stub.count
+    refute_nil Stub.firsts=~/no.*salt/
+    assert_equal 'zang_empty0', Stub.lasts
     refute system("test -e #{zin}/abc")
     refute system("test -e #{zang}/abc")
 
@@ -291,16 +294,16 @@ class Test_Helpers < Test::Unit::TestCase
     system("touch #{zin}/salt")
     system("touch #{zang}/abc")
     system("touch #{zang}/salt")
-    system("ln -s #{zin}/salt #{zin}/saltine")
+    system("mkdir #{zin}/saltine")
     Mock.delete_pads(zin, zang)
     assert_equal 1, Stub.count
     msg = Stub.firsts
-    refute_nil msg=~/Did not delete.*saltine/
+    refute_nil msg=~/saltine/
     refute system("test -e #{zin}/abc")
     refute system("test -e #{zin}/salt")
     refute system("test -e #{zang}/abc")
     refute system("test -e #{zang}/salt")
-    assert system("rm #{zin}/saltine")
+    assert system("rmdir #{zin}/saltine")
 
     Stub.clear
 
