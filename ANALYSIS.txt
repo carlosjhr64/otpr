@@ -4,9 +4,11 @@
 # It's not necessarily the actual code.
 # What is Entropy?
 
-  class Entropy
-    def initialize(bits=256)
-      @entropy = bits.times.inject([]){|a,i|a<<rand(2)}.join
+  class Entropy < String
+    def self.bits(n)
+      entropy = Entropy.new('')
+      n.times.inject(entropy){|a,i|a<<rand(2).to_s}
+      return entropy
     end
   end
   E = Entropy
@@ -19,18 +21,19 @@
 #   ~/.cache/otpr
 # The yin/yang salts are:
 
-   s0 = E.new # Looks like 10000010101101100111...
-   s1 = E.new
+   # Looks like 10000010101101100111...
+   s0 = E.bits(256)
+   s1 = E.bits(256)
 
 # These have 256 bits of entropy.
-# That a lot of bits.  Let's use hexadecimal notation.
+# That's a lot of bits.  Let's use hexadecimal notation.
 # Coverting to and from hexadecimal is "easy".
 # That is, it's a reversible process.
 # To show that in notation, let's use the * operator.
 
   module Convertible
     def *(n)
-      e = @entropy.to_i(2).to_s(n)
+      e = self.to_i(2).to_s(n)
     end
   end
   E.include Convertible
@@ -40,13 +43,15 @@
   H = 16
 
 # So to refer to the hex represention of s0 and s1, do:
-
-  s0*H # will look like b338f69415...
+ 
+  # will look like b338f69415...
+  s0*H
   s1*H
 
 # Just to show that this is reversible:
 
-  (s0*H).to_i(16).to_s(2) # Looks like 1000001...
+  # Looks like 1000001...
+  (s0*H).to_i(16).to_s(2)
 
 # In the code, I use BaseConvert because
 # it allows me to use arbitrary symbols
@@ -62,30 +67,33 @@
 # because there's no standard way to represent these.
 # As shown, we can go up to 36:
 
-  s0*36 # looks like 24e5iq2s...
+  # looks like 24e5iq2s...
+  s0*36
 
 # Just to show I ain't cheatin'...
 
   require 'base_convert'
-
   module Convertible
     def *(n)
       case n
       when 91, :qgraph
-        e = @entropy.to_i(2).to_s(16)
+        e = self.to_i(2).to_s(16)
         BaseConvert.new(:hex,:qgraph).convert(e)
       when 62, :word
-        e = @entropy.to_i(2).to_s(16)
+        e = self.to_i(2).to_s(16)
         BaseConvert.new(:hex,:word).convert(e)
       else
-        @entropy.to_i(2).to_s(n)
+        self.to_i(2).to_s(n)
       end
     end
   end
   E.include Convertible
 
-  s0*Q # looks like #RaRVL<Y...
-  s0*W # looks like KBk48Wqa...
+  # looks like #RaRVL<Y...
+  s0*Q
+
+  # looks like KBk48Wqa...
+  s0*W
 
 # s0*Q and s1*Q is what's stored in the salt files.
 # This makes it easier to inspect.
@@ -97,14 +105,34 @@
 # I'll denote the pin as p, and the passphrase as w:
 
   p = 'abc' # whatever the user says
+  w = s + p
+  # or expanded out...
   w = s0*Q + s1*Q + p
 
-# BTW, +  and * behave as expected for the right choice of base(2**n).
-# With H you have the algebra. Not with Q.
-# But I'd have to overload + to show that.
+# BTW, + and * behave as expected for the righ choice of base(2**n), but 
+# I need overwrite the + operator to stay in the class:
+
+  class Entropy
+    def +(e)
+      Entropy.new(super)
+    end
+  end
+
+  a = s0*H + s1*H
+  b = (s0 + s1)*H
+  # Works for H
+  a == b
+  # => true
+
+  a = s0*Q + s1*Q
+  b = (s0 + s1)*Q
+  # Doesn't work for Q
+  a == b
+  # => false
+
 # According to Wikipedia's
 # *Paswords strength[http://en.wikipedia.org/wiki/Password_strength]*
-# entry:
+# article:
 #   Due to currently understood limitations from fundamental physics,
 #   there is no expectation that any digital computer (or combination)
 #   will be capable of breaking 256-bit encryption via a brute-force attack.
@@ -114,7 +142,8 @@
   require 'digest'
   D = Digest::SHA256
   d0 = D.digest w
-  d0.length # => 32
+  d0.length
+  # => 32
 
 # The digest of w is a binary string of length 32.
 # This equivalent to 256 bits of entropy.
@@ -138,7 +167,8 @@
   C  = Digest::MD5
   d1 = C.digest( s )
   k  = d0 + d1
-  k.length == 48 # => true
+  k.length == 48
+  # => true
 
 # Now my key, k, has more than 256 bits of entropy, but that's OK.
 # For concise notation, recognize that digest are thought of hashes:
@@ -154,7 +184,8 @@
 # So the key, k, expanded out is:
 
   k = D[s0*Q + s1*Q + p] + C[s0*Q + s1*Q + p]
-  k.length == 48 # => true
+  k.length == 48
+  # => true
 
 # Given our plain text secret, s:
 
@@ -176,18 +207,51 @@
   s == k^c # => true!
 
 # Tada!
-# Can't actually run the following because
-# the objects don't automatically extend themselves, but
-# expanded it all out it is:
-#   c = (D[s0*Q + s1*Q + p] + C[s0*Q + s1*Q + p])^s
-#   s == (D[s0*Q + s1*Q + p] + C[s0*Q + s1*Q + p])^c # => true
+# It be nice to have the digest auto extend the xor, and
+# retain the method under addition...
+
+  class D
+    def digest(s)
+      dg = super
+      dg.extend Xor
+      def dg.+(x)
+        x = super
+        x.extend Xor
+        return x
+      end
+      return dg
+    end
+  end
+
+  class C
+    def digest(s)
+      dg = super
+      dg.extend Xor
+      def dg.+(x)
+        x = super
+        x.extend Xor
+        return x
+      end
+      return dg
+    end
+  end
+
+# Now I should be able to expand it all out:
+
+   c = (D[s0*Q + s1*Q + p] + C[s0*Q + s1*Q + p])^s
+
+   (D[s0*Q + s1*Q + p] + C[s0*Q + s1*Q + p])^c
+   #=> "Top Secret Password!"
+
+   s == (D[s0*Q + s1*Q + p] + C[s0*Q + s1*Q + p])^c
+   # => true
+
 # To store the encripted secret, and allow  the use of multiple pins,
 # I need a filename, f, that's based on the pin, but
 # that cannot be reversed back to the pin.
 #
-#  f = d1*W  # d1 is a digest object, so it dont know about *.
-#
-# Again, objects don't extend themselves, but
+#   f = d1*W  # d1 is a digest binary string, does not know how to * yet.
+# 
 # Expanded it out:
 #
 #  f = C[s0*Q + s1*Q + p]*W
@@ -201,6 +265,6 @@
 # But let's make it as near impossible as possible!  :P
 # I re-encript with a new random key and save the key in the removable media under f.
 # The --regen option allows one to re-generate the two files.
-# The regenaration does not need to know the passphase.
+# The regenaration does not need to know the passphrase.
 # So if at anytime any either Yin or Yang is compromised,
 # just regenarate all the pads.
