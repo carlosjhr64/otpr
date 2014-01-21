@@ -296,12 +296,12 @@
 
 # Now I should be able to expand it all out:
 
-   c = (D[s0*Q + s1*Q + p] + C[s0*Q + s1*Q + p])^s
+   c0 = (D[s0*Q + s1*Q + p] + C[s0*Q + s1*Q + p])^s
 
-   (D[s0*Q + s1*Q + p] + C[s0*Q + s1*Q + p])^c
+   (D[s0*Q + s1*Q + p] + C[s0*Q + s1*Q + p])^c0
    #=> "Top Secret Password!"
 
-   s == (D[s0*Q + s1*Q + p] + C[s0*Q + s1*Q + p])^c
+   s == (D[s0*Q + s1*Q + p] + C[s0*Q + s1*Q + p])^c0
    # => true
 
 # To store the encripted secret, and allow the use of multiple pins,
@@ -330,6 +330,7 @@
 # BTW, here k1 has 256 bits of entropy, not more.
 
   c1 = k1^c0
+  c0 == k1^c1 #=> true
 
 # q is saved in yin/f and c1 is saved in yang/f.
 # The --regen option allows one to re-generate the two files.
