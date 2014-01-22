@@ -337,3 +337,30 @@
 # The regenaration does not need to know the passphrase.
 # So if at anytime any either Yin or Yang is compromised,
 # just regenarate all the pads.
+
+# Entropy from words?
+# The file
+#    /usr/share/dict/american-english
+# has just under 100,000 words.
+
+   DICTIONARY = `wc /usr/share/dict/american-english`.strip.split(/\s+/).first.to_i
+   #=> 99171
+   # or
+   DICTIONARY = 99171
+
+# If we treat this as the size of the base,
+# we can get a rough estimate of the entropy in a line of text.
+# (Of course, it's true entropy is more complicated)
+# For 16 words, we get over 256 bits of entropy:
+
+  DICTIONARY**16 > 2**256
+  #=> true
+
+# To determine the number of words needed for n bits of entropy
+# I'll use:
+
+  n = 256 # for example...
+  (1 + n*Ln[2]/Ln[DICTIONARY]).round
+  #=> 16
+
+# The added *1* ensures at least one word.
