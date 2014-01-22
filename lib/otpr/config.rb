@@ -1,34 +1,50 @@
 module OTPR
 
-  # Defining Configuration
-  DIGEST  = Digest::SHA256
+  # Defining Configuration:
+  DIGEST  = Digest::SHA512
   CHKSUM  = Digest::MD5
-  PPT     = :qgraph # Passphrase Type
-  PNT     = :word   # Pin Type
-  STRIP   = true    # leading and trailing whitespaces are meaningless?
+  ENTROPY = 256            # Desired entropy in bits
+  PPT     = :qgraph        # Passphrase Type
+  PNT     = :word          # Pin Type
+  STRIP   = true           # Leading and trailing whitespaces are meaningless?
 
   # THIS ONE SHOULD NOT BE CHANGED
   # UNLESS ONE IS PREPARED TO CHECK EVERYTHING ELSE
-  SBT     = :hex    # Standard Base Type
+  SBT     = :hex    # Standard Base Type, hexadecimal
 
-  # Computable Configuration
-  # Example values assumes SHA256 above,
-  # with  MD5 checksum,
+  # Computable Configuration:
+  # Example values assumes 256 bits of entropy,
+  # SHA512 digest, MD5 checksum,
   # :hex standard base type,
-  # :qgraph passphrase, and
-  # :word pin.
-  DIGEST_LENGTH = DIGEST.digest('').length    # 32
-  CHKSUM_LENGTH = CHKSUM.digest('').length    # 16
-  ENTROPY       = 8*DIGEST_LENGTH             # 256
-  NIBBLES       = ENTROPY/4                   # 64
-  WORDS         = (0.5 + ENTROPY/16.0).round  # 17
-  SBS           = BaseConvert::BASE[SBT]      # 16 Standard/Hex Base Size
-  PPS           = BaseConvert::BASE[PPT]      # 91 Passphrase Base Size
-  PNS           = BaseConvert::BASE[PNT]      # 62 Pin Base Size
-  PPK           = 8*Math.log(2)/Math.log(PPS) # 1.229...
-  PNK           = 8*Math.log(2)/Math.log(PNS) # 1.343...
-  PPL           = (1+PPK*DIGEST_LENGTH).to_i  # 40
-  PNL           = (1+PNK*CHKSUM_LENGTH).to_i  # 22
+  # :qgraph passphrase, and :word pin.
+  # Not all constants used (or useful?), but provided for completeness.
+  DIGEST_LENGTH = DIGEST.digest('').length        # 64
+  CHKSUM_LENGTH = CHKSUM.digest('').length        # 16
+  # Base sizes:
+  SBS           = BaseConvert::BASE[SBT]          # 16 Standard/Hex Base Size
+  PPS           = BaseConvert::BASE[PPT]          # 91 Passphrase Base Size
+  PNS           = BaseConvert::BASE[PNT]          # 62 Pin Base Size
+  DWS           = 99171                           # Dictionary Size (word count)
+  # Conversion constants:
+  LG2           = Math.log(2)                     # 0.693...
+  SBK           = LG2/Math.log(SBS)               # 0.25
+  PPK           = LG2/Math.log(PPS)               # 0.153...
+  PNK           = LG2/Math.log(PNS)               # 0.167...
+  DWK           = LG2/Math.log(DWS)               # 0.0602...
+  # Lengths based on desired entropy:
+  PPE           = (1 + PPK*ENTROPY).round         # 40
+  PNE           = (1 + PNK*ENTROPY).round         # 44
+  DWE           = (1 + DWK*ENTROPY).round         # 16
+  # Lengths based on digest length:
+  PPD           = (1 + PPK*8*DIGEST_LENGTH).round # 80
+  PND           = (1 + PNK*8*DIGEST_LENGTH).round # 87
+  DWD           = (1 + DWK*8*DIGEST_LENGTH).round # 32
+  # Lengths based on checksum length:
+  PPC           = (1 + PPK*8*CHKSUM_LENGTH).round # 21
+  PNC           = (1 + PNK*8*CHKSUM_LENGTH).round # 22
+  DWC           = (1 + DWK*8*CHKSUM_LENGTH).round # 9
+  # Desired entropy in nibbles (for hexadecimal)
+  NIBBLES       = ENTROPY/4                       # 64
 
   CONFIG = {
 
@@ -93,7 +109,9 @@ More help: gem man otpr
     :enter_pin      => 'Pin: ',
     :pin_min        => 0,
     :pin_too_short  => 'Pin is too short.',
-    :pin_max        => PNL,
+    # The maximum pin length is based on the maximum meaningful entropy.
+    # The pin is checked against CHKSUM, so longer pins are just wasteful.
+    :pin_max        => PNC,
     :pin_too_long   => 'Pin is too long.',
     :pin_accept     => '^\w*$',
     :pin_reject     => '[_]',
@@ -104,7 +122,10 @@ More help: gem man otpr
     :enter_secret      => 'Secret: ',
     :secret_min        => 0,
     :secret_too_short  => 'Secret is too short.',
-    :secret_max        => PPL,
+    # Since the encription key is based on the DIGEST,
+    # secrets longer than DIGEST_LENGTH cannot be properly
+    # covered using simple xor.
+    :secret_max        => DIGEST_LENGTH,
     :secret_too_long   => 'Secret is too long.',
     :secret_accept     => '^[[:graph:]]*$',
     :secret_reject     => '[\'"]',
