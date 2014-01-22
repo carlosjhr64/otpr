@@ -94,22 +94,11 @@ def computer_random
     Entropy.computer.to(PPT) :
     Entropy.redundant.to(PPT)
   system_clear
-  random.pad!(PPL)
+  random.pad!(PPE)
 end
 
 def get_secret
   (CONFIG[:random])? computer_random : user_secret
-end
-
-def get_salt(dir)
-  saltfile = File.join dir, 'salt'
-  unless File.exist? saltfile
-    STDERR.puts (CONFIG[:writting] + saltfile).color(:green)
-    File.open(saltfile, 'w', 0600) do |f|
-      f.write Entropy.computer.to(:qgraph).pad!(40)
-    end
-  end
-  File.read saltfile
 end
 
 def files_in(zin)

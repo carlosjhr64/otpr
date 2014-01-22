@@ -6,6 +6,7 @@ require 'securerandom'
 # Gems
 require 'test/unit'
 require 'base_convert'
+require 'rainbow'
 
 # Require support libraries
 require 'otpr/config'
@@ -23,23 +24,27 @@ require 'otpr/otpr'
 class Test_Otpr < Test::Unit::TestCase
   include OTPR
   def test_001_initialize
-    assert_nothing_raised(Exception){Otpr.new('A_Passphrase', ZIN, ZANG)}
-    assert_raise(Error){Otpr.new('A_Passphrase', ZIN, '/no-such-dir')}
-    assert_raise(Error){Otpr.new('A_Passphrase', '/dir-not-here', ZANG)}
+    assert_nothing_raised(Exception){Otpr.new('A_Pin', ZIN, ZANG)}
+    assert_raise(Error){Otpr.new('A_Pin', ZIN, '/no-such-dir')}
+    assert_raise(Error){Otpr.new('A_Pin', '/dir-not-here', ZANG)}
   end
 
   def test_002_attributes
-    otpr = Otpr.new('A_Passphrase', ZIN, ZANG)
-    digest = DIGEST.digest('A_Passphrase')
-    key = digest + CHKSUM.digest('A_Passphrase')
-    chksum = BaseConvert.new(:hex, :word).convert(CHKSUM.hexdigest('A_Passphrase'))
-    assert_equal key, otpr.key
+    otpr = Otpr.new('A_Pin', ZIN, ZANG)
+
+    salt = File.read("#{ZIN}/salt") + File.read("#{ZANG}/salt")
+    assert_equal salt, otpr.salt
+
+    digest = Digest::SHA512.digest('A_Pin'+salt)
+    assert_equal digest, otpr.key
+
+    chksum = BaseConvert.new(:hex, :word).convert(Digest::MD5.hexdigest('A_Pin'+salt))
     assert_equal File.join(ZIN, chksum),  otpr.zin
     assert_equal File.join(ZANG, chksum), otpr.zang
   end
 
   def test_003_exist
-    otpr = Otpr.new('A_Passphrase', ZIN, ZANG)
+    otpr = Otpr.new('A_Pin', ZIN, ZANG)
 
     refute otpr.exist?
     refute otpr.inconsistent?

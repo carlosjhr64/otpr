@@ -73,11 +73,8 @@ begin
     exit
   end
 
-  # Writes a random salt if needed.  Reads the salt.
-  SALT = get_salt(MEDIA_CACHE) + get_salt(USERSPACE.cachedir)
-
   # Otp object from pin. Verify that it has the 2 split keys (or none).
-  otpr = Otpr.new(SALT+get_pin, MEDIA_CACHE, USERSPACE.cachedir)
+  otpr = Otpr.new(get_pin, MEDIA_CACHE, USERSPACE.cachedir)
   refute otpr.inconsistent?, :pin_inconsistent
 
   # Creates the new pin.
@@ -104,7 +101,7 @@ begin
   # Copies or moves an existing pin.
   if OPTIONS[:copy] or OPTIONS[:move]
     OPTIONS.usage_error(:pin_does_not_exist) unless otpr.exist?
-    otpr2 = Otpr.new(SALT+get_pin, MEDIA_CACHE, USERSPACE.cachedir)
+    otpr2 = Otpr.new(get_pin, MEDIA_CACHE, USERSPACE.cachedir)
     OPTIONS.usage_error(:pin_exists) unless CONFIG[:overwrite] or !otpr2.exist?
     secret = otpr.get
     otpr2.set secret

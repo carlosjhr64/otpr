@@ -204,18 +204,18 @@ class Test_Helpers < Test::Unit::TestCase
     assert_equal 'abcd', pin
   end
 
-  def test_014_get_salt
-    Stub.clear
-    tmpdir = Dir.mktmpdir
-    salt = Mock.get_salt(tmpdir)
-    assert_equal 1, Stub.count
-    refute_nil Stub.firsts=~/Writting.*salt/
-    refute_nil salt=~/^[[:graph:]]{40}$/
-    Stub.clear
-    salt2 = Mock.get_salt(tmpdir)
-    assert_equal 0, Stub.count
-    assert_equal salt, salt2
-  end
+# def test_014_get_salt
+#   Stub.clear
+#   tmpdir = Dir.mktmpdir
+#   salt = Mock.get_salt(tmpdir)
+#   assert_equal 1, Stub.count
+#   refute_nil Stub.firsts=~/Writting.*salt/
+#   refute_nil salt=~/^[[:graph:]]{40}$/
+#   Stub.clear
+#   salt2 = Mock.get_salt(tmpdir)
+#   assert_equal 0, Stub.count
+#   assert_equal salt, salt2
+# end
 
   def test_014_delete_pads
     Stub.clear

@@ -1,18 +1,27 @@
 module OTPR
   class Otpr
-    def self.digest(passphrase)
-      digest = DIGEST.digest(passphrase)
-      digest + CHKSUM.digest(passphrase)
+    def self.salt(dir)
+      saltfile = File.join dir, 'salt'
+      unless File.exist? saltfile
+        STDERR.puts (CONFIG[:writting] + saltfile).color(:green)
+        File.open(saltfile, 'w', 0600) do |f|
+          f.write Entropy.computer.to(:qgraph).pad!(PPE)
+        end
+      end
+      File.read saltfile
     end
 
-    attr_reader :key, :zin, :zang
-    def initialize(passphrase, yindir, yangdir)
+    attr_reader :key, :zin, :zang, :salt
+    def initialize(pin, yindir, yangdir)
       unless File.exist?(yindir) and File.exist?(yangdir)
         raise Error, :media_not_found
       end
-      digest = Otpr.digest(passphrase)
+
+      @salt  = Otpr.salt(yindir) + Otpr.salt(yangdir)
+      digest = DIGEST.digest(pin+@salt)
       @key   = Key.new(digest)
-      xcs    = CHKSUM.hexdigest(passphrase)
+
+      xcs    = CHKSUM.hexdigest(pin+@salt)
       wcs    = BaseConvert.new(SBT, PNT).convert(xcs)
       @zin   = File.join yindir,  wcs
       @zang  = File.join yangdir, wcs
@@ -33,15 +42,15 @@ module OTPR
 
     def self.pad(plain)
       plain = plain.strip
-      while plain.length < PPL
+      while plain.length < PPE
         plain+=' '
       end
       return plain
     end
 
     def self.set(zin, zang, encripted)
-      yin       = Entropy.computer.to(PPT).pad!(PPL)
-      dyin      = Otpr.digest(yin)
+      yin       = Entropy.computer.to(PPT).pad!(PPE)
+      dyin      = DIGEST.digest(yin)
       yang      = Key.new(dyin).xor(encripted)
       File.open(zin,  'w', 0600){|f| f.write yin}
       File.open(zang, 'w', 0600){|f| f.write yang}
@@ -55,7 +64,7 @@ module OTPR
 
     def self.get(zin, zang)
       yin   = File.read zin
-      dyin  = Otpr.digest(yin)
+      dyin  = DIGEST.digest(yin)
       yang  = File.read zang
       return Key.new(dyin).xor(yang)
     end
