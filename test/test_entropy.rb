@@ -90,7 +90,7 @@ class Test_Entropy < Test::Unit::TestCase
     words = ['A', 'house', 'divided', 'stack', 'of', 'cards.',
      'I', 'ran', 'like', 'Ann', 'Rand.',
      'Be', 'like', 'oil,', 'my', 'goodfella.',
-     'Adios!']
+     'Goodbye!']
     a = Entropy.words(words)
     assert_equal NIBBLES, a.length
     assert_equal 64, a.length

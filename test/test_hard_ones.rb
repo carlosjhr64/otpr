@@ -28,13 +28,13 @@ module Stub
     CALLS.first
   end
   def self.firsts
-    CALLS.first.first
+    (tmp=CALLS.first)? tmp.first : nil
   end
   def self.last
     CALLS.last
   end
   def self.lasts
-    CALLS.last.last
+    (tmp=CALLS.last)? tmp.last : nil
   end
   def print(*args)
     CALLS.push(args)
@@ -56,9 +56,9 @@ class Test_Hard_Ones < Test::Unit::TestCase
   def test_001_entropy_user
     STDIN.puts 'One Two Three Four Five'
     STDIN.puts 'Six Seven Eight Nine Ten'
-    STDIN.puts 'Eleven Twelve Thirteen Fourteen Fifteen'
-    STDIN.puts 'Sixteen'
-    STDIN.puts 'Senveteen!'
+    STDIN.puts 'Eleven Twelve Thirteen Fourteen'
+    STDIN.puts 'Fifteen'
+    STDIN.puts 'Sixteen!'
     a = nil
     Timeout::timeout(1){ a = Entropy.user }
     assert_equal 0, Stub.count
@@ -75,12 +75,12 @@ class Test_Hard_Ones < Test::Unit::TestCase
     assert_equal 0, qa=~/^[[:graph:]]{40}$/
   end
 
-  def test_001_entropy_redundant
+  def test_002_entropy_redundant
     STDIN.puts 'One Two Three Four Five'
     STDIN.puts 'Six Seven Eight Nine Ten'
-    STDIN.puts 'Eleven Twelve Thirteen Fourteen Fifteen'
-    STDIN.puts 'Sixteen'
-    STDIN.puts 'Senveteen!'
+    STDIN.puts 'Eleven Twelve Thirteen Fourteen'
+    STDIN.puts 'Fifteen'
+    STDIN.puts 'Sixteen!'
     a = nil
     Timeout::timeout(1){ a = Entropy.redundant }
     assert_equal 0, Stub.count
