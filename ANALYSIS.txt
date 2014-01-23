@@ -343,7 +343,7 @@
 #    /usr/share/dict/american-english
 # has just under 100,000 words.
 
-   DICTIONARY = `wc /usr/share/dict/american-english`.strip.split(/\s+/).first.to_i
+   # DICTIONARY = `wc /usr/share/dict/american-english`.strip.split(/\s+/).first.to_i
    #=> 99171
    # or
    DICTIONARY = 99171
@@ -364,3 +364,34 @@
   #=> 16
 
 # The added *1* ensures at least one word.
+
+# My computer can run *otpr* about 10 times per second.
+# For the purpose of cracking, one can do a lot better
+# by looking at the code and figuring out the most streamline way to
+# start guessing a pin.  But I'm looking for some minimum standards.
+# At a time of 0.1 seconds, what does it crack in 2 weeks (1 week on average)?
+
+  total_time = 60*60*24*7*2
+  bits = total_time / 0.1 # 10 per second
+  n = (Ln[bits]/Ln[2]).round #=> ~ 24 bit of entropy
+  Ln[2]*n/Ln[256] #=> 3
+  Ln[2]*n/Ln[91]  #=> ~3.7 (Q passwords length)
+  Ln[2]*n/Ln[62]  #=> ~4.0 (W passwords length)
+  Ln[2]*n/Ln[10]  #=> ~7.2 (Digits password)
+
+# Lets see how quickly is cracks a 3 letter (62 base) password.
+
+  bits = 62**3
+  total_time = bits * 0.1 # 1209600.0 seconds
+  total_time / (60*60) # ~6.6 hours
+
+# On average, just over 3 hours.
+# How about a 4 letter (62 base) password.
+
+  bits = 62**4
+  total_time = bits * 0.1
+  total_time / (60*60*24) # ~17 days
+
+# Note that this assumes the attacker has access to all your files.
+# Nonetheless, I think it makes sense to enforce
+# a minimun pin of 3 characters, if not 4.
