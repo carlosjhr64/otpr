@@ -3,6 +3,12 @@
 github :: https://www.github.com/carlosjhr64/otpr
 rubygems :: https://rubygems.org/gems/otpr
 
+Warning: I've not published this "version 2" on rubygems yet, and
+the code is still changing.  So in a sense, it's not really version 2 yet...
+If you use any git snapshot of this prior to it being published on rubygems,
+the files you generate with it will very likely
+not work with the eventually published version.
+
 == DESCRIPTION:
 
 Use short pins to access your long passwords.
