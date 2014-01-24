@@ -1,14 +1,14 @@
 Gem::Specification.new do |s|
 
   s.name     = 'otpr'
-  s.version  = '2.0.0'
+  s.version  = '2.0.0.alpha'
 
   s.homepage = 'https://github.com/carlosjhr64/otpr'
 
   s.author   = 'CarlosJHR64'
   s.email    = 'carlosjhr64@gmail.com'
 
-  s.date     = '2014-01-21'
+  s.date     = '2014-01-23'
   s.licenses = ['MIT']
 
   s.description = <<DESCRIPTION
@@ -53,6 +53,7 @@ test/test_helpers.rb
 test/test_key.rb
 test/test_manually.rb
 test/test_otpr.rb
+test/test_otpr_salt.rb
 test/test_version.rb
   )
   s.executables << 'otpr'
