@@ -1,11 +1,15 @@
 module OTPR
   class Otpr
-    def self.salt(dir)
+    def self.salt(dir, r=false)
       saltfile = File.join dir, 'salt'
       unless File.exist? saltfile
         STDERR.puts (CONFIG[:writting] + saltfile).color(:green)
         File.open(saltfile, 'w', 0600) do |f|
-          f.write Entropy.computer.to(:qgraph).pad!(PPE)
+          if r
+            f.write Entropy.redundant.to(:qgraph).pad!(PPE)
+          else
+            f.write Entropy.computer.to(:qgraph).pad!(PPE)
+          end
         end
       end
       File.read saltfile
@@ -17,7 +21,7 @@ module OTPR
         raise Error, :media_not_found
       end
 
-      @salt  = Otpr.salt(yindir) + Otpr.salt(yangdir)
+      @salt  = Otpr.salt(yindir) + Otpr.salt(yangdir, true)
       digest = DIGEST.digest(pin+@salt)
       @key   = Key.new(digest)
 

@@ -1,6 +1,5 @@
-TODO:
+== TODO:
 
-* make s1 (yin salt) real rand
 * SHA256 should be fed p + s0 + s1
 * only show passphrase when asked
 * use clipboard when asked
@@ -13,4 +12,6 @@ TODO:
 
 == File List
 
+== DONE:
 
+* make s1 (yin salt) real rand
