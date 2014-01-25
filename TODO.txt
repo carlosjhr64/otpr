@@ -1,6 +1,5 @@
 == TODO:
 
-* SHA256 should be fed p + s0 + s1
 * only show passphrase when asked
 * use clipboard when asked
 * semantics!
@@ -15,3 +14,4 @@
 == DONE:
 
 * make s1 (yin salt) real rand
+* SHA512 should be fed p + s0 + s1 was already done.
