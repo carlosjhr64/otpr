@@ -105,6 +105,16 @@ class Test_Entropy < Test::Unit::TestCase
     assert_equal 0, wa=~/^\w+$/
     qa.pad!(40)
     assert_equal 0, qa=~/^[[:graph:]]{40}$/
+
+    b = Entropy.words(words)
+    assert_equal(a, b)
+    time_salt = Time.now.to_f.to_s
+    c = Entropy.words(words, time_salt)
+    refute_equal(b, c)
+    d = Entropy.words(words, Time.now.to_f.to_s)
+    refute_equal(c, d)
+    e = Entropy.words(words, time_salt)
+    assert_equal(c, e)
   end
 
 end
