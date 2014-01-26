@@ -5,7 +5,7 @@ module OTPR
       unless File.exist? saltfile
         STDERR.puts (CONFIG[:writting] + saltfile).color(:green)
         File.open(saltfile, 'w', 0600) do |f|
-          if r
+          if r and !CONFIG[:test_mode]
             f.write Entropy.redundant.to(:qgraph).pad!(PPE)
           else
             f.write Entropy.computer.to(:qgraph).pad!(PPE)

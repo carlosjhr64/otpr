@@ -1,4 +1,5 @@
 # Stadard Library
+require 'open-uri'
 require 'digest'
 require 'tmpdir'
 require 'securerandom'
@@ -23,6 +24,8 @@ require 'otpr/otpr'
 
 class Test_Otpr < Test::Unit::TestCase
   include OTPR
+  CONFIG[:test_mode] = true
+
   def test_001_initialize
     assert_nothing_raised(Exception){Otpr.new('A_Pin', ZIN, ZANG)}
     assert_raise(Error){Otpr.new('A_Pin', ZIN, '/no-such-dir')}

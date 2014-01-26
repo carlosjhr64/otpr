@@ -2,7 +2,7 @@
 Feature: Main features
 
   Background:
-    * Given command "ruby -I ./lib ./bin/otpr --media=."
+    * Given command "ruby -I ./lib ./bin/otpr -t --media=."
 
   Scenario: First -cbR should be able to create
     * Then not system(test -e .otpr)
