@@ -60,7 +60,7 @@ class Test_Hard_Ones < Test::Unit::TestCase
     STDIN.puts 'Fifteen'
     STDIN.puts 'Sixteen!'
     a = nil
-    Timeout::timeout(1){ a = Entropy.user }
+    Timeout::timeout(1){ a = Entropy.user(Time.now.to_f.to_s) }
     assert_equal 0, Stub.count
     assert_equal 64, a.length
     min, max = a.minmax
