@@ -1,148 +1,220 @@
 #!ruby!
+#
+# *** OTRP ***
+#
+
+# `otpr` is a command line utility to manage master passwords.
+# These passwords can be up to 64 characters in length.
+# It is not practical to expect one to type these out
+# and much less remember them.
+# `otpr` allows one to access these password with easy to remember pins.
+# Each password is locked by a set of keys
+# stored in a secured cache directory and in removable media.
+# All keys must be present, including the pin, to access the password.
+# The mathematics of how this is done is explained here.
 # One should be able to follow along using irb.
 # The purpose of the code here is show math.
-# It's not necessarily the actual code.
+# It's not necessarily the actual libray code.
+
+#
+# *** ENTROPY ***
+#
+
 # What is Entropy?
-# Here, basically it is (at random) one (string) of many possible:
+# Here, basically it is (at random) one (string) out of many possible.
+# For 4 bits of entropy, one (such string) out of many possible may be:
 
-  class Entropy < String
-    attr_reader :base, :bits
-    def initialize(entropy='', base=2)
-      super(entropy)
-      @base = base
-      @bits = base ** self.length
-    end
+  4.times.inject(''){|s,i|s<<rand(2).to_s}
+  #=> like "0010"
 
-    def increase(n=1)
-      n.times{self<<rand(@base).to_s}
-      @bits = @base ** self.length
-      self
-    end
-    alias pp increase
+# I'll need the entropia gem to write the mathetical notation:
 
-    def set_bits(b, z='0')
-      @bits = b
-      # Sometimes we need to pad entropy back up.
-      while @bits > @base ** self.length
-        self.insert(0, z)
-      end
-    end
+  require 'entropia'
+  include ENTROPIA
 
-    def self.[](n)
-      Entropy.new.pp(n)
-    end
-  end
+# So now, for 4 bits of entropy I can write:
 
-  # For concision:
-  E = Entropy
+  s = E[4]
+  #=> Again, something like "0010"
 
-# Because of the dual nature of split pad files,
-# in the code I use the terms Yin and Yang.
-# Yin refers to the removable media.
-#    /media/KINGSTON/.otpr
-# Yang refers to the disk cache.
-#   ~/.cache/otpr
-# The yin/yang salts are:
+# Semantics is important!
+# Technically, Entropy[http://en.wikipedia.org/wiki/Entropy] is:
+#   a measure of the number of specific ways in which a system may be arranged
+# The number of ways `s`(with 4 bits) can be written is 16:
 
-   # Looks like 10000010101101100111...
-   s0 = E[256]
-   s1 = E[256]
+  s.entropy
+  #=> 16
+  s.bits
+  #=> 4.0
 
-# These have 256 bits of entropy.
-# That's a lot of bits.  Let's use hexadecimal notation.
+# It's easy to enumerate 16 ways, so here it is:
+# 0)  "0000"
+# 1)  "0001"
+# 2)  "0010"
+# 3)  "0011"
+# 4)  "0100"
+# 5)  "0101"
+# 6)  "0110"
+# 7)  "0111"
+# 8)  "1000"
+# 9)  "1001"
+# 10) "1010"
+# 11) "1011"
+# 12) "1100"
+# 13) "1101"
+# 14) "1110"
+# 15) "1111"
+
+# I'll be working with logarithms, base 2.
+# Entropia provides Lb.
+# Keep in mind that here Lb is in base two,
+# I don't mean the natural logarithm, Ln, which is base Math::E.
+
+  s.bits == Lb[s.entropy]
+  #=> true
+
+# One of the first choices I have to make in `otpr`'s configuration
+# is the entropy I should use to safeguard the master passwords.
+# According to Wikipedia's
+# *Paswords strength[http://en.wikipedia.org/wiki/Password_strength]*
+# article:
+#   Due to currently understood limitations from fundamental physics,
+#   there is no expectation that any digital computer (or combination)
+#   will be capable of breaking 256-bit encryption via a brute-force attack.
+# Let's look at this claim with some quick numbers and
+# Planck time[http://en.wikipedia.org/wiki/Planck_time]:
+
+  plank_time = 5.4e-44 # seconds
+  total_time = plank_time * (2**256) # ~ 6.3e+33 seconds...
+  total_time/(60*60*24*365*1_000_000) # ~2.0e+20 Million years, that looks like a long time!
+  2.0**256.0 #=> ~ 1.2e+77
+
+# We can get a sense of how long a 256 bit password is:
+
+  256/Lb[256] #=>   32 (binary string)
+  256/Lb[91]  #=> ~ 39 (passwords composed of [[:graph:]] except ['"])
+  256/Lb[62]  #=> ~ 43 (passwords composed of letters and numbers, [\w] except [_])
+  256/Lb[10]  #=> ~ 77 (passwords composed of digits, [\d])
+
+# Just curious, what's a 2 year's crack of this "planck" computer?
+
+  total_time = 60*60*24*365*2
+  bits = total_time / plank_time #=> 1.168e+51
+  Lb[bits].round #=> 170
+
+# So it would crack a 170 bit password in just over a year on average.
+# We can get a sense of how long a 170 bit password is:
+
+  170/Lb[256] #=> ~ 21 (binary string)
+  170/Lb[91]  #=> ~ 26 (passwords composed of [[:graph:]] except ['"])
+  170/Lb[62]  #=> ~ 29 (passwords composed of letters and numbers, [\w] except [_])
+  170/Lb[10]  #=> ~ 51 (passwords composed of digits, [\d])
+
+# I'll use 256 bits of entropy.
+# It's a nice round number for computers.
+
+  256 == 2**8
+  #=> true
+  256 == 16**2
+  #=> true
+  256 == 4**4
+  #=> true
+  256 == 'FF'.to_i(16) + 1
+  #=> true
+
+# So lets get 256 bits of entropy:
+
+  s = E[256]
+  #=> Like "10110110100101..."
+  s.bits
+  #=> 256.0
+  s.length
+  #=> 256
+
+# That's a long string!
+# The string could be more manageable for our eyes
+# if expressed in Hexadecimal notation.
 # Coverting to and from hexadecimal is "easy".
 # That is, it's a reversible process.
 # To show that in notation, let's use the * operator.
 
-  module Convertible
-    def *(n)
-      entropy = Entropy.new(self.to_i(base).to_s(n), n)
-      entropy.set_bits(self.bits)
-      return entropy
-    end
-  end
-  Entropy.include Convertible
+  s*16
+  #=> Like "B1783CFAFA..."
 
 # Hexadecimal notation is madeup of 16 symbols.
+# Entropia denotes hexademals with H:
 
-  H = 16
-
-# So to refer to the hex represention of s0 and s1, do:
- 
-  # Looks like b338f69415...
-  s0*H
-  s1*H
+  H #=> 16
+  s*H
+  #=> Like "B1783CFAFA..."
 
 # Just to show that this is reversible:
 
-  # Looks like 1000001...
-  (s0*H)*2
-  (s0*H)*2 == s0 #=> true
+  s*H*2
+  #=> Looks like "101101..."
+  s*H*2 == s
+  #=> true
+  (s*H*2).to_s == s.to_s
+  #=> true
 
-# The above looks strange for `*`, but
-# later it will make more sense.
-# In the libray, I use BaseConvert because
-# it allows me to use arbitrary symbols
+# This does not look exactly like the arithmetic `*`, but
+# it'll make more sense later.
+# You can convert to other bases too:
+
+  s*8
+  #=> Like ""1332247144..."
+  s*36
+  #=> Like "1O95GWZ39MRQJTFE..."
+
+# Entropia uses BaseConvert because
+# it allows it to use arbitrary symbols
 # and base size greater than 36.
-# Let Q be a base 91 representation.
-# Let W be a base 62 representation.
 
-  Q = 91
-  W = 62
+  s*37
+  #=> Like "0G6GLFO4D..."
 
-# You'll get an "invalid radix 91" error
-# if you try to convert to these bases with the simple code above
-# because there's no standard way to represent these.
-# As shown, we can go up to 36:
+# Q is a base 91 representation.
+# BaseConvert uses [[:graph:]] except ['"] symbols.
+# Q is suitable for passphrases/passwords:
 
-  # looks like 24e5iq2s...
-  s0*36
+  Q #=> 91
+  s*Q
+  #=> Like "%;F=4KTy?m1h..."
 
-# Just to show I ain't cheatin'...
+# W is a base 62 representation.
+# BaseConvert uses [\w] except [_] symbols.
+# W is suitable for filenames and simple pins:
 
-  require 'base_convert'
-  module Convertible
-    def *(n)
-      base = BaseConvert.new(self.base, n)
-      # What is zero's symbol in this base?
-      zero = base.to_digits.first
-      entropy = Entropy.new(base.convert(self.to_s), n)
-      entropy.set_bits(self.bits, zero)
-      return entropy
-    end
-  end
-  Entropy.include Convertible
+  W #=> 62
+  s*W
+  #=> Like "hIKmiQUkovctH..."
 
-  # looks like #RaRVL<Y...
-  s0*Q
-  s0*Q*2 == s0 #=>true
+  s*Q == s*W
+  #=> true, represents the same bit sequence
+  (s*Q).to_s == (s*W).to_s
+  #=> false, different string representations
 
-  # looks like KBk48Wqa...
-  s0*W
-  s0*W*2 == s0 #=> true
+# A lot of things come in twos.
+# True/False.  On/Off.  Up/Down.  Numerator/Denominator.
+# This duality I call Yin/Yang.
+# I mean by it nothing more than that
+# I'm dealing with 2 related objects, a pair.
+# I'll denote Yin with subscript 0, and
+# I'll denote Yang with subscript 1.
 
-# s0*Q and s1*Q is what's stored in the salt files.
-# This makes it easier to inspect.
-# The combined salt is:
+  s0 = E[256]
+  s1 = E[256]
 
-  s = s0*Q + s1*Q
+# I can add these two entropies toguether.
 
-# The passphrase is the salted pin, which is given by the user.
-# I'll denote the pin as p, and the passphrase as w:
+  s = s0 + s1
+  #=> Like "101..."
+  s.length
+  #=> 512
+  s.bits
+  #=> 512.0
 
-  p = 'abc' # whatever the user says
-  w = s + p
-  # or expanded out...
-  w = s0*Q + s1*Q + p
-
-# BTW, + and * behave as expected for the righ choice of base(2**n), but 
-# I need to overwrite the + operator to stay in the class:
-
-  class Entropy
-    def +(e)
-      Entropy.new(super)
-    end
-  end
+# BTW, + and * behave as expected for the right choice of base(2**n).
 
   a = s0*H + s1*H
   b = (s0 + s1)*H
@@ -156,164 +228,239 @@
   a == b
   # => false
 
-# I'm going to do some log fun next, so for concision:
+# 
+# ***XOR-CIPHER***
+#
 
-  module Ln
-    def self.[](n)
-      Math.log(n)
+# XOR-CIPHER[http://en.wikipedia.org/wiki/XOR_cipher] is very easy to implement.
+# These are the facts one needs to consider, as explained in Wikipedia:
+#    If the key is random and is at least as long as the message,
+#    the XOR cipher is much more secure than when there is key repetition within a message.
+#    When the keystream is generated by a pseudo-random number generator, the result is a stream cipher.
+#    With a key that is truly random, the result is a one-time pad, which is unbreakable even in theory.
+# It's the one-time pad feature that makes the XOR-chipher perfect for `otpr`.
+# The passwords being stored are going to be the same length or shorter than the keys.
+# One thing I'll need to keep track of though, is wheather or not the keys are truly random.
+# If the entropy string is generated by a pseudo-random generator, it should have a randomness value of 0.
+# Entropia keeps track of that:
+
+  s.randomness
+  #=> 0.0
+
+# Entropia uses SecureRandom.random_number, and assumes it's a pseudo-random number generator.
+# One needs to explicitly give Entropia the random numbers, telling it that they're random,
+# for it to treat them as truly random:
+
+  ################### 256  truly     random? numbers... ############
+  s1 = E.new.increase(256, true){|n| SecureRandom.random_number(n) }
+  s1.randomness
+  #=> 256
+  # or you can do...
+  s1 = E[0]
+  s1.pp(256, true){|n| rand(n)} # pp aliases increase
+  s1.randomness
+  #=> 256
+
+# We'll deal with how to get true randomness later.
+# What is xor? Xor is exclusive or.
+# It's true if either is true but not both.
+
+  false ^ false
+  #=> false
+  true  ^ false
+  #=> true
+  false ^ true
+  #=> true
+  true  ^ true
+  #=> false
+
+# Same with 0 and 1:
+
+  0^0==0
+  0^1==1
+  1^0==1
+  1^1==0
+  #=> all true
+
+# And you can xor integers.
+# If you look at the binary representation,
+# you should see how that's done:
+
+  97.to_s(2) #=> "1100001"
+  98.to_s(2) #=> "1100010"
+  3.to_s(2)  #=>      "11"
+  97^98
+  #=> 3
+
+# 3, 97, 98 form a Trinity under Xor.
+# By Trinity I mean nothing more than three related objects.
+
+  97^3  == 98
+  3^97  == 98
+  98^3  == 97
+  3^98  == 97
+  98^97 ==  3
+  97^98 ==  3
+
+# This shows how letters (and strings) can be xor-ed:
+
+  'a'.bytes #=> [97]
+  'b'.bytes #=> [98]
+  97.chr    #=> "a"
+  99.chr    #=> "c"
+
+# But xor is not defined in Strings,
+# so let's monkey patch it in.
+
+  class String
+    def ^(plain, i=-1)
+      plain.bytes.inject(''){|p, b| p+(b^self.bytes[(i+=1)%length]).chr}
     end
   end
 
-# According to Wikipedia's
-# *Paswords strength[http://en.wikipedia.org/wiki/Password_strength]*
-# article:
-#   Due to currently understood limitations from fundamental physics,
-#   there is no expectation that any digital computer (or combination)
-#   will be capable of breaking 256-bit encryption via a brute-force attack.
-# Let's look at this claim with some quick numbers:
-#   Planck time[http://en.wikipedia.org/wiki/Planck_time] :: ~ 5.4e−44 seconds
-    plank_time = 5.4e-44 # seconds
-    total_time = plank_time * (2**256) # ~ 6.3e+33 seconds, that looks like long time!
-    2.0**256.0 #=> ~ 1.2e+77
-# Just curious, what's a 2 year's crack of this "planck" computer?
-    total_time = 60*60*24*365*2
-    bits = total_time / plank_time #=> 1.168e+51
-    (Ln[bits]/Ln[2]).round #=> ~ 170
-# So it would crack a 170 bit password in just over a year.
-    Ln[2]*170/Ln[256] #=> ~ 21.2
-    Ln[2]*170/Ln[91]  #=> ~ 26.1 (Q passwords length)
-    Ln[2]*170/Ln[62]  #=> ~ 28.6 (W passwords length)
-# I'll just keep 256 bits of entropy.
-# For this purpose I'll use SHA256.
-# I'll also be using MD5.
+# Now we can xor strings:
 
-  require 'digest'
-  D = Digest::SHA256
-  C = Digest::MD5
+  'ABC'^'xyz'
+  #=> "9;9"
+  '9;9'^'ABC' == 'xyz'
+  #=> true
 
-# For concise notation, recognize that digest are thought of hashes:
+# We can use passphrases to encript secrets:
 
-  module HashNotation
-    def [](key)
-      self.digest(key)
-    end
-  end
-  C.extend HashNotation
-  D.extend HashNotation
+  p = 'My Passphrase'
+  s = 'My Secret'
+  e = p^s
+  #=> "\u0000\u0000\u0000\u0003\u0004\u0010\u0001\u0015\u001C"
 
-  d0 = D[w]
-  d0.length
-  # => 32
+# The encripted message is, e, unreadable.
+# But can get the secret back with the passphrase.
 
-# The digest of w is a binary string of length 32.
-# This equivalent to 256 bits of entropy.
+  p^c
+  #=> "My Secret"
+  s == p^c
+  #=> true
 
-  2**256 == 256**32 # => true
+#
+# ***Cryptographic hash function***
+#
 
-# Expanded out, d0 is:
+# `otpr` uses SHA512 and MD5 digests[http://en.wikipedia.org/wiki/Cryptographic_hash_function].
+# The their useful properties are:
+#    1) It is infeasible to generate a message that has a given hash.
+#    2) It is infeasible to modify a message without changing the hash.
+#    3) It is infeasible to find two different messages with the same hash.
+# I use MD5 to name a pin's files.  Given a pin, I know the files to use for the pin,
+# but knowing the file names does not tell me the pin.
+# And I use SHA512 to create the encription key.
+# The reason is a bit subtle.
+# The encription key should be random, but often times it's based on a meaningful message.
+# SHA512 completely scrambles any message (or lack of randomness)
+# that might otherwise creep into the encription key.
 
-  d0 = D[ s0*Q + s1*Q + p ]
+#
+# ***Salt***
+#
 
-# I need a key to encript the secret.
-# Encription will be a simple xor, which
-# is fine for a secret about the size of the key.
-# Because passwords typically can't use the full 256 ascii set,
-# a graph password would have to be at least 40 characters long
-# to contain about 256 bits of entropy, which is longer than d0.
-# According to the Password strength article in Wikipedia,
-# a *Case sensitive Latin alphabet* password would need to be 45 characters long.
-# I just need a key a little bigger that d.  So I add MD5.
+# Salt[http://en.wikipedia.org/wiki/Salt_(cryptography)] is added to the pin
+# to project the final encription key from attempts at getting the key by simply guessing the pin.
+# The salt is combined from two salt files, one in the removable media (yin salt), and
+# one in a secured cache directory (yang salt).
 
-  d1 = C[w]
-  k0  = d0 + d1
-  k0.length == 48
-  # => true
+  s0 = E[256]
+  s0.randomness
+  #=> 0
+  s1 = E.new.pp(256, true){|n| rand(n)}
+  s1.randomness
+  #=> 256
 
-# Now my key, k0, has more than 256 bits of entropy, but that's OK.
-# So the key, k0, expanded out is:
+# For the yang salt, the library gets random bits from random.org to guarantee randomness.
+# But for our analysis here, we just call rand and pretend it's random.
+ 
+# s0*Q and s1*Q is what's stored in the salt files.
+# This makes it easier to inspect.
+# The combined salt is:
 
-  k0 = D[s0*Q + s1*Q + p] + C[s0*Q + s1*Q + p]
-  k0.length == 48
-  # => true
+  s = s0*Q + s1*Q
+  s.randomness
+  #=> 256
+  s.bits
+  #=> 512
+  s.shuffled?
+  #=> false
 
-# Given our plain text secret, s:
+# Note that the first part of the string is pseudo-random, while second is real random.
+# This won't matter, as it'll all go into SHA512(but Entropia keeps track of the shuffle state).
+# The passphrase is the salted pin, which is given by the user.
+# I'll denote the pin as p, and the passphrase as w:
 
-  s = 'Top Secret Password!'
+  p = Entropia.new 'ThePin', Q # whatever the user says
+  w = p + s
+  # or expanded out...
+  w = p + s0*Q + s1*Q
+  # Looks like "ThePin..."
+  w.randomness
+  #=> 256
+  w.bits
+  #=> Greater than 512
+  w.shuffled?
+  #=> false
 
-# We want to *xor* with the key:
+# I don't know if it matters, but in case the digest preserves any information,
+# I feed in order of increasing randomness: p, s0, s1 => p+s0*Q+s1*Q.
+# The SHA512 digest of w is a binary string of length 64.
 
-  module Xor
-    def ^(secret, i=-1)
-      secret.bytes.inject(''){|plain, byte| plain+(byte^self.bytes[(i+=1)%length]).chr}
-    end
-  end
-  k0.extend Xor
+  k0 = D[w]
+  k0.length
+  #=> 64
+  k0.bits
+  #=> 512.0
+  k0.randomness
+  #=> 256.0
+  k0.shuffled?
+  #=> true (I think we can agree on this)
+  k0.class
+  #=> String
+  # Entropia handles digests separately.  The String instance is extended.
 
-# Now we can encript the secret:
+# Because this is going to be one of the encriptions key,
+# the secret(master-password) should not be much bigger than 64 characters.
+# The key, k0, can be assumed to have an entropy capacity of 512 bits, and
+# since our salt had at least 256 bits of randomness, this key should be good to go!
+# Expanded out, k0 is:
 
-  c = k0^s  # => looks like S{)\xABI\x02...
-  k0^c      # => 'Top Secret Password!'
-  s == k0^c # => true!
+  k0 = D[ p + s0*Q + s1*Q ]
+
+# Now we can do our first encription.
+# Given our plain text passwoard, P:
+
+  P = Entropia.new 'Top_Secret_Password!', Q
+  c0 = k0^P  # => looks like S{)\xABI\x02...
+  k0^c0      # => 'Top_Secret_Password!'
+  (k0^c0).class #=> String: remember that k0 is an extended String, so xor returns a String.
+  P.to_s == k0^c0
+  #=> true: So to test equality, we need to convert P to a string.
+
 
 # Tada!
-# It be nice to have the digest auto extend the xor, and
-# retain the method under addition...
-# and know how to handle * too!
+# Expanded all out:
 
-  module Operators
-    def +(x)
-      x = super
-      x.extend Xor
-      return x
-    end
-    def *(x)
-      e = self.bytes.inject(''){|e, byte| e<<byte.to_s(16)}
-      e = Entropy.new(e, 16)
-      return e*x
-    end
-  end
+   c0 = D[ p + s0*Q + s1*Q ] ^ P
 
-  class D
-    def digest(s)
-      dg = super
-      dg.extend Xor
-      dg.extend Operators
-      return dg
-    end
-  end
-
-  class C
-    def digest(s)
-      dg = super
-      dg.extend Xor
-      dg.extend Operators
-      return dg
-    end
-  end
-
-  d0 = D[w]
-  d1 = C[w]
-
-# Now I should be able to expand it all out:
-
-   c0 = (D[s0*Q + s1*Q + p] + C[s0*Q + s1*Q + p])^s
-
-   (D[s0*Q + s1*Q + p] + C[s0*Q + s1*Q + p])^c0
-   #=> "Top Secret Password!"
-
-   s == (D[s0*Q + s1*Q + p] + C[s0*Q + s1*Q + p])^c0
-   # => true
+   D[ p + s0*Q + s1*Q ] ^ c0
+   #=> "Top_Secret_Password!"
 
 # To store the encripted secret, and allow the use of multiple pins,
 # I need a filename, f, that's based on the pin, but
 # that cannot be reversed back to the pin.
 
    # Looks like 1Rpq3qgBnMMLC3aPUsS7t
-   f = d1*W
+   f = C[w]*W
+
    # or expanded out...
-   f = C[s0*Q + s1*Q + p]*W
+   f = C[p + s0*Q + s1*Q]*W
    # You can verify that
-   d1*W == C[s0*Q + s1*Q + p]*W #=> true
+   C[w]*W == C[p + s0*Q + s1*Q]*W
+   #=> true
 
 # I save the secret in the cache directory under the name of f.
 # But what if at some point, because the salts and pin don't change,
@@ -325,7 +472,7 @@
 # I re-encript with a new random key and save the key in the removable media under f.
 
   q = E[256]*Q
-  k1 = D[q]+C[q]
+  k1 = D[q]
 
 # BTW, here k1 has 256 bits of entropy, not more.
 
@@ -338,7 +485,10 @@
 # So if at anytime any either Yin or Yang is compromised,
 # just regenarate all the pads.
 
-# Entropy from words?
+#
+# ***Entropy from words?***
+#
+
 # The file
 #    /usr/share/dict/american-english
 # has just under 100,000 words.
@@ -360,12 +510,12 @@
 # I'll use:
 
   n = 256 # for example...
-  (1 + n*Ln[2]/Ln[DICTIONARY]).round
+  (1 + n*Lb[2]/Lb[DICTIONARY]).round
   #=> 16
 
 # The added *1* ensures at least one word.
 
-# My computer can run *otpr* about 10 times per second.
+# My computer can run `otpr` about 10 times per second.
 # For the purpose of cracking, one can do a lot better
 # by looking at the code and figuring out the most streamline way to
 # start guessing a pin.  But I'm looking for some minimum standards.
@@ -373,11 +523,11 @@
 
   total_time = 60*60*24*7*2
   bits = total_time / 0.1 # 10 per second
-  n = (Ln[bits]/Ln[2]).round #=> ~ 24 bit of entropy
-  Ln[2]*n/Ln[256] #=> 3
-  Ln[2]*n/Ln[91]  #=> ~3.7 (Q passwords length)
-  Ln[2]*n/Ln[62]  #=> ~4.0 (W passwords length)
-  Ln[2]*n/Ln[10]  #=> ~7.2 (Digits password)
+  n = (Lb[bits]/Lb[2]).round #=> ~ 24 bit of entropy
+  Lb[2]*n/Lb[256] #=> 3
+  Lb[2]*n/Lb[91]  #=> ~3.7 (Q passwords length)
+  Lb[2]*n/Lb[62]  #=> ~4.0 (W passwords length)
+  Lb[2]*n/Lb[10]  #=> ~7.2 (Digits password)
 
 # Lets see how quickly is cracks a 3 letter (62 base) password.
 
@@ -395,3 +545,7 @@
 # Note that this assumes the attacker has access to all your files.
 # Nonetheless, I think it makes sense to enforce
 # a minimun pin of 3 characters, if not 4.
+# Basically it's just enough to stop that guy in the next cubicle
+# from guessing one of you pins while you're out on a coffee break
+# and you forget to lock your screen.
+# You know.  That guy...  I hate that guy!
