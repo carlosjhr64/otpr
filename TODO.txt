@@ -1,9 +1,9 @@
 == TODO:
 
+* some tests may have broken due to Entropy.user(salt,conf)... test Entropy.user(salt, conf).
 * only show passphrase when asked
 * use clipboard when asked
 * semantics!
-* use time to add some randomnes... when started, when entered, etc...
 * if s1!=s0, user should know the s0 about to be lost. verify that.
 * trust 1tp more than sha.
 * write man page
@@ -15,3 +15,4 @@
 
 * make s1 (yin salt) real rand
 * SHA512 should be fed p + s0 + s1 was already done.
+* use time to add some randomness...

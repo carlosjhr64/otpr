@@ -45,13 +45,13 @@ module OTPR
       return computer
     end
 
-    def self.words(words)
-      string = DIGEST.hexdigest(words.join(' ')).chars.map{|h|h.to_i(SBS)}[0..(NIBBLES-1)]
+    def self.words(words, salt='')
+      string = DIGEST.hexdigest(words.join(' ') + salt).chars.map{|h|h.to_i(SBS)}[0..(NIBBLES-1)]
       string.extend Convertable
       return string
     end
 
-    def self.user(conf={})
+    def self.user(salt='', conf={})
       conf.extend OTPR::Config
       words = [] # Entropy from user
       while (words.length) < DWE
@@ -59,13 +59,14 @@ module OTPR
         words += ((conf[:echo])? STDIN.gets : STDIN.noecho(&:gets)).strip.split(/\s+/)
         words.uniq!
       end
-      return Entropy.words(words)
+      return Entropy.words(words, salt)
     end
 
     def self.redundant
       web = nil
       Thread.new{ web = Entropy.web }
-      user = Entropy.user
+      # User's list of words salted with Time.now...
+      user = Entropy.user(Time.now.to_f.to_s)
       computer = Entropy.computer
       redundant = 0.upto(NIBBLES-1).inject([]) do |a, i|
         r = (computer[i] + user[i])%SBS
