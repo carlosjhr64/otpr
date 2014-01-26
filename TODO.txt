@@ -5,7 +5,6 @@
 * use clipboard when asked
 * semantics!
 * if s1!=s0, user should know the s0 about to be lost. verify that.
-* trust 1tp more than sha.
 * write man page
 * publish on rubygems
 
