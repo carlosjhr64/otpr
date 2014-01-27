@@ -96,7 +96,7 @@ When `otpr` runs succesfully,
 the primary final response is to show the pin's password with exit code 0.
 The main exception to this occurs when run with the --status option,
 in which case it will show either `OK`, `INCONSISTENT`, or `NOT FOUND`,
-with exit code 0, 76, and 66 respectively.
+with exit code 0, 76, or 66 respectively.
 
 Responses and exit codes on errors or exceptions are as follows:
 
