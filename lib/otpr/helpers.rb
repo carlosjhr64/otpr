@@ -40,16 +40,39 @@ def user_pin(conf={})
   pin, pin0 = '', nil
   # Ensure user can acurately enter and repeat the pin
   until pin == pin0
-    pin, pin0, length = pin0, nil, -1
-    until (length >= min) and (length <= max) and (pin0 =~ accept) and !(pin0 =~ reject)
+    pin, pin0, failed = pin0, nil, true
+    while failed
+      failed = false
+#(length >= min) and (length <= max) and (pin0 =~ accept) and !(pin0 =~ reject)
       print conf[:enter_pin]
       pin0 = stdin_gets(conf)
       puts unless conf[:echo]
       length = pin0.length
       break unless conf[:pin_validation]
-      puts conf[:pin_not_valid] if !(pin0 =~ accept) or (pin0 =~ reject)
-      puts conf[:pin_too_short] if length < min
-      puts conf[:pin_too_long]  if length > max
+      # User defined validations
+      if !(pin0 =~ accept) or (pin0 =~ reject)
+        failed = true
+        puts conf[:pin_not_valid]
+      end
+      if length < min
+        failed = true
+        puts conf[:pin_too_short]
+      end
+      if length > max
+        failed = true
+        puts conf[:pin_too_long]
+      end
+      # Hard coded validations
+      unless failed # no need to continue testing...
+        if (length < 3)          or
+        (pin0 =~ /^\d{0,6}$/)    or
+        (pin0 =~ /^[a-z]{0,4}$/) or
+        (pin0 =~ /^[A-Z]{0,4}$/) or
+        (pin0 =~ /^\W{0,4}$/)
+          failed = true
+          puts conf[:pin_too_short]
+        end
+      end
     end
     puts conf[:repeat_pin] unless pin == pin0
   end

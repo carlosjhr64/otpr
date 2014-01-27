@@ -16,3 +16,4 @@
 * SHA512 should be fed p + s0 + s1 was already done.
 * use time to add some randomness...
 * some tests may have broken due to Entropy.user(salt,conf)... test Entropy.user(salt, conf).
+* test hard coded validations
