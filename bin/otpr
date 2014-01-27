@@ -83,18 +83,18 @@ begin
     secret = get_secret
     otpr.set secret
     assert_equal(otpr.get, secret, :could_not_set)
-    puts secret
+    puts secret if CONFIG[:show_secret]
     exit
   end
 
   # Updates an existing pin.
   if OPTIONS[:update]
     OPTIONS.usage_error(:pin_does_not_exist) unless otpr.exist?
-    puts otpr.get unless CONFIG[:batch]
+    puts otpr.get if CONFIG[:show_secret] and not CONFIG[:batch]
     secret = get_secret
     otpr.set secret
     assert_equal(otpr.get, secret, :could_not_set)
-    puts secret
+    puts secret if CONFIG[:show_secret]
     exit
   end
 
@@ -107,7 +107,7 @@ begin
     otpr2.set secret
     assert_equal(otpr2.get, secret, :could_not_set)
     otpr.delete if OPTIONS[:move]
-    puts secret
+    puts secret if CONFIG[:show_secret]
     exit
   end
 
@@ -116,7 +116,7 @@ begin
     OPTIONS.usage_error(:pin_does_not_exist) unless otpr.exist?
     confirmed = true
     unless CONFIG[:batch]
-      puts otpr.get
+      puts otpr.get if CONFIG[:show_secret]
       confirmed = ask(CONFIG[:confirm_delete])==CONFIG[:y]
     end
     if confirmed

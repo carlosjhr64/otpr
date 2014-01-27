@@ -19,6 +19,12 @@ def refute(b, comment)
 end
 
 def assert_equal(a, b, comment)
+  if comment == :could_not_set
+    # Never ever seen this type of error
+    # but if it happens then
+    # need to give user a chance to copy b.
+    STDERR.puts b if a!=b
+  end
   assert(a==b, comment)
 end
 
@@ -154,7 +160,7 @@ def regen_pads(zin, zang)
       encripted = Otpr.get(filename, filename2)
       Otpr.set(filename, filename2, encripted)
       encripted2 = Otpr.get(filename, filename2)
-      assert_equal(encripted, encripted2, :could_not_set)
+      assert_equal(encripted, encripted2, :could_not_regen)
     else
       # This is an alert for possible problems with the software.
       error_message("Unpaired key: #{name}", :green)

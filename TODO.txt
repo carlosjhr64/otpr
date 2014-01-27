@@ -1,9 +1,7 @@
 == TODO:
 
-* only show passphrase when asked
 * use clipboard when asked
 * semantics!
-* if s1!=s0, user should know the s0 about to be lost. verify that.
 * write man page
 * publish on rubygems
 
@@ -17,3 +15,5 @@
 * use time to add some randomness...
 * some tests may have broken due to Entropy.user(salt,conf)... test Entropy.user(salt, conf).
 * test hard coded validations
+* only show passphrase when asked
+* if s1!=s0, user should know the s0 about to be lost. verify that.

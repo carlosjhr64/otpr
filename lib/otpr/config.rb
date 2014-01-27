@@ -78,7 +78,9 @@ Options:
   -e --echo --no-echo.
   -w --overwrite --no-overwrite.
   -P --pin-validation --no-pin-validation
-  -S --secret-validation --no-secret-validation
+  -V --secret-validation --no-secret-validation
+  Show or don't show secret?:
+  -S --show-secret --no-show-secret
   Where is the flash drive?:
   --media='/removable-media-directory/'
 
@@ -89,12 +91,12 @@ More help: gem man otpr
     :random        => false,
     :batch         => false,
     :clear         => false,
-    :echo          => true,
     :regen         => false,
+    :echo          => true,
     :overwrite     => false,
-    # More default Options
     :pin_validation    => true,
     :secret_validation => true,
+    :show_secret       => true,
     :media             => '/media/KINGSTON/',
 
     # Default Options not defined in help...
@@ -148,6 +150,7 @@ More help: gem man otpr
     :no_yin_yang        => 'Pad files not found.',
     :not_bucket_full    => 'Did not get a full bucket.',
     :could_not_set      => 'Could not set secret.',
+    :could_not_regen    => 'Could not regenerate a pad.',
     :pin_inconsistent   => 'Pin is missing a key.',
     :pin_does_not_exist => 'Pin does not exist.',
     :pin_exist          => 'Pin exist.',
