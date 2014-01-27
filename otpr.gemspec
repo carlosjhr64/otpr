@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.author   = 'CarlosJHR64'
   s.email    = 'carlosjhr64@gmail.com'
 
-  s.date     = '2014-01-26'
+  s.date     = '2014-01-27'
   s.licenses = ['MIT']
 
   s.description = <<DESCRIPTION
@@ -67,6 +67,5 @@ test/test_version.rb
   s.requirements << 'rm in development: rm (GNU coreutils) 8.13'
   s.requirements << 'mkdir in development: mkdir (GNU coreutils) 8.13'
   s.requirements << 'rmdir in development: rmdir (GNU coreutils) 8.13'
-  s.requirements << 'ruby in development: ruby 2.1.0p0 (2013-12-25 revision 44422) [x86_64-linux]'
 
 end

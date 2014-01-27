@@ -4,6 +4,7 @@ otpr(1) - Long passwords from short pins.
 ## SYNOPSIS
 
 `otpr` <options><br>
+`otpr` `--help`<br>
 `otpr` `--create`<br>
 `otpr` `--read`<br>
 `otpr` `--update`<br>
@@ -11,35 +12,134 @@ otpr(1) - Long passwords from short pins.
 
 ## DESCRIPTION
 
-**otpr** maintains short pins for long passwords.
+Use short pins to access your long passwords.
 
 ## OPTIONS
 
+* `-v`, `--version`:
+  Puts the version and exits.
+* `-h`, `--help`:
+  Puts the help and exits.
 * `-c`, `--create`:
-  Create blah blah blah.
-
-## EXAMPLES
+  Will create a new pin/password pair.
+  Enter the pin via STDIN, followed by the password.
+  Will exit with error if there is a pre-existing pin.
+* `-r`, `--read`:
+  Puts the pin's password.
+  Enter the pin via STDIN.
+  Will exit with error if the pin does not exist.
+* `-u`, `--update`:
+  Updates a pre-existing pin with a new password.
+  Enter the pin via STDIN, followed by the password.
+  Will exit with error if the pin does not exist.
+* `-d`, `--delete`:
+  Deletes a pre-existing pin.
+  Enter the pin via STDIN.
+  Will exit with error if the pin does not exist.
+* `-s`, `--status`:
+  Puts the status of a pin.
+  Enter the pin via STDIN.
+  A pin's status may be `OK`(exists), `INCONSISTENT`(either key o: file missing), or `NOT FOUND`(does not exist).
+* `-C`, `--copy`:
+  Copies a pin to a new pin.
+  Enter the pins via STDIN.
+  Will exit with error if the source pin does not exist.
+  Will exit with error if the target pin exist unless run with the --overwrite option.
+* `-M`, `--move`:
+  Behaves just like --copy, except that it deletes the source pin.
+* `--erase`:
+  Delete all keys in removable median, and their paired files in secured cache.
+  Will allert of any unexpected conditions, like missing paired file.
+* `--regen-all`:
+  Will re-create random key in removable media and re-encript paired files in the secured cached.
+  See also --regen.
+* `--remove-unpaired`:
+  Will remove all unpaired files and key.
+  You should not do this if you're using `otpr` with more than one removable media.
+  `otpr` does not create unpaired keys and files.
+  Unpaired keys or files only happen if you use multiple medias, or if you delete or add a file directly.
+* `--remove-unpaired-keys`:
+  Removes unpaired keys from removabe media.  See --remove-unpaired.
+* `--remove-unpaired-files`:
+  Removes unpaired files from secured cache.  See --remove-unpaired.
+* `-R`, `--random`:
+  With --create or --update, will create a new 256 bit random Q-password for you.
+* `-b`, `--batch`:
+  Turns off interactive mode.
+  Pin only needs to be entered once, without confirmation.
+  Good for use with other scripts.
+* `-l`, `--clear`:
+  Clears the screen after use inputs.
+* `-g`, `--regen`:
+  Re-encripts pin-password pair after reading it.
+  See also --regen-all.
+* `-e`, `--echo`:
+  User input to STDIN will not show.
+* `-w`, `--overwrite`:
+  With --copy or --move, will allow user to overwrite an existing target pin.
+* `-P`, `--pin-validation`, `--no-pin-validation`:
+  User may choose to skip normal pin validations.
+  The original default is to validate, although one can change this default in the configuration.
+* `-V`, `--secret-validation`, `--no-secret-validation`:
+  User may choose to skip normal password validations.
+  The original default is to validate, although one can change this default in the configuration.
+* `-S`, `--show-secret`, `--no-show-secret`:
+  User may choose to not to show the password.
+  The original default is to show, although one can change this default in the configuration.
+  --read ignores this option and will show the password.
+* `--media`:
+  The directory where to the removable media.
 
 ## RESPONSES
 
-Or maybe this is a sub-heading elsewhere?
+When `otpr` runs succesfully,
+the primary final response is to show the pin's password with exit code 0.
+The main exception to this occurs when run with the --status option,
+in which case it will show either `OK`, `INCONSISTENT`, or `NOT FOUND`,
+with exit code 0, 76, and 66 respectively.
 
-## EXIT STATUS
+Responses and exit codes on errors or exceptions are as follows:
 
-Or maybe this is a sub-heading elsewhere?
+* Usage Exception :
+  User asked for help or version :: exit code 0
+* Usage Error :
+  User inputs was incorrect in some manner :: exit code 64
+* Temporary Error:
+  Maybe user forgot to insert the removable media :: exit code 75
+* Not Found Error:
+  Occurs on --status request for a non-existant pin :: exit code 66
+* Protocol Error:
+  An error that should not normally occur :: exit code 76
+
+One reason a protocol error may occur is if the user manually deletes one of the keys
+in removable media and then attempts to read the pin associated with the key.
 
 ## FILES
 
-`~/.config/otpr/config.json`
+* Configuration file :
+  ~/.config/otpr/config.json
 
-## ENVIROMENT
+`otpr` is higly configurable.
+The intallation copy of config.json only shows what the user is most likely to want edit.
+For example, the user will most probably want to edit the default media directory.
+If one deletes this file, a new config.json file will be written showing all editable values.
+To get back the simpler intallation config.json version, remove the ~/.config/otpr directory, and
+the directory will be recreated as first installed.
 
-## BUGS
+* Secured cache directory : 
+  ~/.cache/otpr/
 
-## LICENSE
+This is where the encripted password files are found.
+There should be no need for the user to do anything here nor in the removable media.
 
-## AUTHOR
+* Data directory :
+  ~/.local/share/otpr/
 
-## COPYRIGHT
+The data directory is currently unsused.
+It may contain a version file in the future.
 
-## SEE ALSO
+## LICENSE AUTHOR COPYRIGHT
+
+* MIT license
+* Author: CarlosJHR64, carlosjhr@gmail.com
+* (C) 2014

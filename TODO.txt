@@ -1,12 +1,11 @@
 == TODO:
 
-* write man page
 * publish on rubygems
 
 == File List
 
 
-== DONE:
+== DONE Jan 27, 2014
 
 * make s1 (yin salt) real rand
 * SHA512 should be fed p + s0 + s1 was already done.
@@ -17,3 +16,4 @@
 * if s1!=s0, user should know the s0 about to be lost. verify that.
 * use clipboard when asked <= Nope... this is application level
 * semantics!
+* write man page

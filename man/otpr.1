@@ -10,6 +10,9 @@
 \fBotpr\fR \fIoptions\fR
 .
 .br
+\fBotpr\fR \fB\-\-help\fR
+.
+.br
 \fBotpr\fR \fB\-\-create\fR
 .
 .br
@@ -24,28 +27,168 @@
 .br
 .
 .SH "DESCRIPTION"
-\fBotpr\fR maintains short pins for long passwords\.
+Use short pins to access your long passwords\.
 .
 .SH "OPTIONS"
 .
 .TP
-\fB\-c\fR, \fB\-\-create\fR
-Create blah blah blah\.
+\fB\-v\fR, \fB\-\-version\fR
+Puts the version and exits\.
 .
-.SH "EXAMPLES"
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Puts the help and exits\.
+.
+.TP
+\fB\-c\fR, \fB\-\-create\fR
+Will create a new pin/password pair\. Enter the pin via STDIN, followed by the password\. Will exit with error if there is a pre\-existing pin\.
+.
+.TP
+\fB\-r\fR, \fB\-\-read\fR
+Puts the pin\'s password\. Enter the pin via STDIN\. Will exit with error if the pin does not exist\.
+.
+.TP
+\fB\-u\fR, \fB\-\-update\fR
+Updates a pre\-existing pin with a new password\. Enter the pin via STDIN, followed by the password\. Will exit with error if the pin does not exist\.
+.
+.TP
+\fB\-d\fR, \fB\-\-delete\fR
+Deletes a pre\-existing pin\. Enter the pin via STDIN\. Will exit with error if the pin does not exist\.
+.
+.TP
+\fB\-s\fR, \fB\-\-status\fR
+Puts the status of a pin\. Enter the pin via STDIN\. A pin\'s status may be \fBOK\fR(exists), \fBINCONSISTENT\fR(either key o: file missing), or \fBNOT FOUND\fR(does not exist)\.
+.
+.TP
+\fB\-C\fR, \fB\-\-copy\fR
+Copies a pin to a new pin\. Enter the pins via STDIN\. Will exit with error if the source pin does not exist\. Will exit with error if the target pin exist unless run with the \-\-overwrite option\.
+.
+.TP
+\fB\-M\fR, \fB\-\-move\fR
+Behaves just like \-\-copy, except that it deletes the source pin\.
+.
+.TP
+\fB\-\-erase\fR
+Delete all keys in removable median, and their paired files in secured cache\. Will allert of any unexpected conditions, like missing paired file\.
+.
+.TP
+\fB\-\-regen\-all\fR
+Will re\-create random key in removable media and re\-encript paired files in the secured cached\. See also \-\-regen\.
+.
+.TP
+\fB\-\-remove\-unpaired\fR
+Will remove all unpaired files and key\. You should not do this if you\'re using \fBotpr\fR with more than one removable media\. \fBotpr\fR does not create unpaired keys and files\. Unpaired keys or files only happen if you use multiple medias, or if you delete or add a file directly\.
+.
+.TP
+\fB\-\-remove\-unpaired\-keys\fR
+Removes unpaired keys from removabe media\. See \-\-remove\-unpaired\.
+.
+.TP
+\fB\-\-remove\-unpaired\-files\fR
+Removes unpaired files from secured cache\. See \-\-remove\-unpaired\.
+.
+.TP
+\fB\-R\fR, \fB\-\-random\fR
+With \-\-create or \-\-update, will create a new 256 bit random Q\-password for you\.
+.
+.TP
+\fB\-b\fR, \fB\-\-batch\fR
+Turns off interactive mode\. Pin only needs to be entered once, without confirmation\. Good for use with other scripts\.
+.
+.TP
+\fB\-l\fR, \fB\-\-clear\fR
+Clears the screen after use inputs\.
+.
+.TP
+\fB\-g\fR, \fB\-\-regen\fR
+Re\-encripts pin\-password pair after reading it\. See also \-\-regen\-all\.
+.
+.TP
+\fB\-e\fR, \fB\-\-echo\fR
+User input to STDIN will not show\.
+.
+.TP
+\fB\-w\fR, \fB\-\-overwrite\fR
+With \-\-copy or \-\-move, will allow user to overwrite an existing target pin\.
+.
+.TP
+\fB\-P\fR, \fB\-\-pin\-validation\fR, \fB\-\-no\-pin\-validation\fR
+User may choose to skip normal pin validations\. The original default is to validate, although one can change this default in the configuration\.
+.
+.TP
+\fB\-V\fR, \fB\-\-secret\-validation\fR, \fB\-\-no\-secret\-validation\fR
+User may choose to skip normal password validations\. The original default is to validate, although one can change this default in the configuration\.
+.
+.TP
+\fB\-S\fR, \fB\-\-show\-secret\fR, \fB\-\-no\-show\-secret\fR
+User may choose to not to show the password\. The original default is to show, although one can change this default in the configuration\. \-\-read ignores this option and will show the password\.
+.
+.TP
+\fB\-\-media\fR
+The directory where to the removable media\.
+.
+.SH "RESPONSES"
+When \fBotpr\fR runs succesfully, the primary final response is to show the pin\'s password with exit code 0\. The main exception to this occurs when run with the \-\-status option, in which case it will show either \fBOK\fR, \fBINCONSISTENT\fR, or \fBNOT FOUND\fR, with exit code 0, 76, and 66 respectively\.
+.
+.P
+Responses and exit codes on errors or exceptions are as follows:
+.
+.TP
+Usage Exception
+User asked for help or version :: exit code 0
+.
+.TP
+Usage Error
+User inputs was incorrect in some manner :: exit code 64
+.
+.TP
+Temporary Error
+Maybe user forgot to insert the removable media :: exit code 75
+.
+.TP
+Not Found Error
+Occurs on \-\-status request for a non\-existant pin :: exit code 66
+.
+.TP
+Protocol Error
+An error that should not normally occur :: exit code 76
+.
+.P
+One reason a protocol error may occur is if the user manually deletes one of the keys in removable media and then attempts to read the pin associated with the key\.
 .
 .SH "FILES"
-\fB~/\.config/otpr/config\.json\fR
 .
-.SH "ENVIROMENT"
+.TP
+Configuration file
+~/\.config/otpr/config\.json
 .
-.SH "BUGS"
+.P
+\fBotpr\fR is higly configurable\. The intallation copy of config\.json only shows what the user is most likely to want edit\. For example, the user will most probably want to edit the default media directory\. If one deletes this file, a new config\.json file will be written showing all editable values\. To get back the simpler intallation config\.json version, remove the ~/\.config/otpr directory, and the directory will be recreated as first installed\.
 .
-.SH "LICENSE"
+.TP
+Secured cache directory
+~/\.cache/otpr/
 .
-.SH "AUTHOR"
+.P
+This is where the encripted password files are found\. There should be no need for the user to do anything here nor in the removable media\.
 .
-.SH "COPYRIGHT"
+.TP
+Data directory
+~/\.local/share/otpr/
 .
-.SH "SEE ALSO"
+.P
+The data directory is currently unsused\. It may contain a version file in the future\.
+.
+.SH "LICENSE AUTHOR COPYRIGHT"
+.
+.IP "\(bu" 4
+MIT license
+.
+.IP "\(bu" 4
+Author: CarlosJHR64, carlosjhr@gmail\.com
+.
+.IP "\(bu" 4
+(C) 2014
+.
+.IP "" 0
 

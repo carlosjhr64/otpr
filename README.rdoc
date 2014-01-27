@@ -3,12 +3,6 @@
 github :: https://www.github.com/carlosjhr64/otpr
 rubygems :: https://rubygems.org/gems/otpr
 
-Warning: I've not published this "version 2" on rubygems yet, and
-the code is still changing.  So in a sense, it's not really version 2 yet...
-If you use any git snapshot of this prior to it being published on rubygems,
-the files you generate with it will very likely
-not work with the eventually published version.
-
 == DESCRIPTION:
 
 Use short pins to access your long passwords.
@@ -35,7 +29,7 @@ Use short pins to access your long passwords.
      -C --copy    Copy pin content to a new pin.
      -M --move    Move pin content to a new pin.
      --erase      Deletes all pins.
-     --regen-all  Re-encripts all pads.
+     --regen-all  Re-encripts all pins.
      --remove-unpaired
      --remove-unpaired-keys
      --remove-unpaired-files
@@ -43,11 +37,13 @@ Use short pins to access your long passwords.
      -R --random  Create a random password.
      -b --batch   Turns off interactive mode.
      -l --clear   Clears screen after pin entries.
-     -g --regen   Re-encripts pad.
+     -g --regen   Re-encripts pin.
      -e --echo --no-echo.
      -w --overwrite --no-overwrite.
      -P --pin-validation --no-pin-validation
-     -S --secret-validation --no-secret-validation
+     -V --secret-validation --no-secret-validation
+     Show or don't show secret?:
+     -S --show-secret --no-show-secret
      Where is the flash drive?:
      --media='/removable-media-directory/'
    More help: gem man otpr

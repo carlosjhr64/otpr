@@ -57,14 +57,9 @@
     <a href="#SYNOPSIS">SYNOPSIS</a>
     <a href="#DESCRIPTION">DESCRIPTION</a>
     <a href="#OPTIONS">OPTIONS</a>
-    <a href="#EXAMPLES">EXAMPLES</a>
+    <a href="#RESPONSES">RESPONSES</a>
     <a href="#FILES">FILES</a>
-    <a href="#ENVIROMENT">ENVIROMENT</a>
-    <a href="#BUGS">BUGS</a>
-    <a href="#LICENSE">LICENSE</a>
-    <a href="#AUTHOR">AUTHOR</a>
-    <a href="#COPYRIGHT">COPYRIGHT</a>
-    <a href="#SEE-ALSO">SEE ALSO</a>
+    <a href="#LICENSE-AUTHOR-COPYRIGHT">LICENSE AUTHOR COPYRIGHT</a>
   </div>
 
   <ol class='man-decor man-head man head'>
@@ -81,6 +76,7 @@
 <h2 id="SYNOPSIS">SYNOPSIS</h2>
 
 <p><code>otpr</code> <var>options</var><br />
+<code>otpr</code> <code>--help</code><br />
 <code>otpr</code> <code>--create</code><br />
 <code>otpr</code> <code>--read</code><br />
 <code>otpr</code> <code>--update</code><br />
@@ -88,32 +84,123 @@
 
 <h2 id="DESCRIPTION">DESCRIPTION</h2>
 
-<p><strong>otpr</strong> maintains short pins for long passwords.</p>
+<p>Use short pins to access your long passwords.</p>
 
 <h2 id="OPTIONS">OPTIONS</h2>
 
 <dl>
-<dt><code>-c</code>, <code>--create</code></dt><dd>Create blah blah blah.</dd>
+<dt><code>-v</code>, <code>--version</code></dt><dd>Puts the version and exits.</dd>
+<dt><code>-h</code>, <code>--help</code></dt><dd>Puts the help and exits.</dd>
+<dt><code>-c</code>, <code>--create</code></dt><dd>Will create a new pin/password pair.
+Enter the pin via STDIN, followed by the password.
+Will exit with error if there is a pre-existing pin.</dd>
+<dt><code>-r</code>, <code>--read</code></dt><dd>Puts the pin's password.
+Enter the pin via STDIN.
+Will exit with error if the pin does not exist.</dd>
+<dt><code>-u</code>, <code>--update</code></dt><dd>Updates a pre-existing pin with a new password.
+Enter the pin via STDIN, followed by the password.
+Will exit with error if the pin does not exist.</dd>
+<dt><code>-d</code>, <code>--delete</code></dt><dd>Deletes a pre-existing pin.
+Enter the pin via STDIN.
+Will exit with error if the pin does not exist.</dd>
+<dt><code>-s</code>, <code>--status</code></dt><dd>Puts the status of a pin.
+Enter the pin via STDIN.
+A pin's status may be <code>OK</code>(exists), <code>INCONSISTENT</code>(either key o: file missing), or <code>NOT FOUND</code>(does not exist).</dd>
+<dt><code>-C</code>, <code>--copy</code></dt><dd>Copies a pin to a new pin.
+Enter the pins via STDIN.
+Will exit with error if the source pin does not exist.
+Will exit with error if the target pin exist unless run with the --overwrite option.</dd>
+<dt><code>-M</code>, <code>--move</code></dt><dd>Behaves just like --copy, except that it deletes the source pin.</dd>
+<dt class="flush"><code>--erase</code></dt><dd>Delete all keys in removable median, and their paired files in secured cache.
+Will allert of any unexpected conditions, like missing paired file.</dd>
+<dt><code>--regen-all</code></dt><dd>Will re-create random key in removable media and re-encript paired files in the secured cached.
+See also --regen.</dd>
+<dt><code>--remove-unpaired</code></dt><dd>Will remove all unpaired files and key.
+You should not do this if you're using <code>otpr</code> with more than one removable media.
+<code>otpr</code> does not create unpaired keys and files.
+Unpaired keys or files only happen if you use multiple medias, or if you delete or add a file directly.</dd>
+<dt><code>--remove-unpaired-keys</code></dt><dd>Removes unpaired keys from removabe media.  See --remove-unpaired.</dd>
+<dt><code>--remove-unpaired-files</code></dt><dd>Removes unpaired files from secured cache.  See --remove-unpaired.</dd>
+<dt><code>-R</code>, <code>--random</code></dt><dd>With --create or --update, will create a new 256 bit random Q-password for you.</dd>
+<dt><code>-b</code>, <code>--batch</code></dt><dd>Turns off interactive mode.
+Pin only needs to be entered once, without confirmation.
+Good for use with other scripts.</dd>
+<dt><code>-l</code>, <code>--clear</code></dt><dd>Clears the screen after use inputs.</dd>
+<dt><code>-g</code>, <code>--regen</code></dt><dd>Re-encripts pin-password pair after reading it.
+See also --regen-all.</dd>
+<dt><code>-e</code>, <code>--echo</code></dt><dd>User input to STDIN will not show.</dd>
+<dt><code>-w</code>, <code>--overwrite</code></dt><dd>With --copy or --move, will allow user to overwrite an existing target pin.</dd>
+<dt><code>-P</code>, <code>--pin-validation</code>, <code>--no-pin-validation</code></dt><dd>User may choose to skip normal pin validations.
+The original default is to validate, although one can change this default in the configuration.</dd>
+<dt><code>-V</code>, <code>--secret-validation</code>, <code>--no-secret-validation</code></dt><dd>User may choose to skip normal password validations.
+The original default is to validate, although one can change this default in the configuration.</dd>
+<dt><code>-S</code>, <code>--show-secret</code>, <code>--no-show-secret</code></dt><dd>User may choose to not to show the password.
+The original default is to show, although one can change this default in the configuration.
+--read ignores this option and will show the password.</dd>
+<dt class="flush"><code>--media</code></dt><dd>The directory where to the removable media.</dd>
 </dl>
 
 
-<h2 id="EXAMPLES">EXAMPLES</h2>
+<h2 id="RESPONSES">RESPONSES</h2>
+
+<p>When <code>otpr</code> runs succesfully,
+the primary final response is to show the pin's password with exit code 0.
+The main exception to this occurs when run with the --status option,
+in which case it will show either <code>OK</code>, <code>INCONSISTENT</code>, or <code>NOT FOUND</code>,
+with exit code 0, 76, and 66 respectively.</p>
+
+<p>Responses and exit codes on errors or exceptions are as follows:</p>
+
+<dl>
+<dt>Usage Exception </dt><dd>User asked for help or version :: exit code 0</dd>
+<dt>Usage Error </dt><dd>User inputs was incorrect in some manner :: exit code 64</dd>
+<dt>Temporary Error</dt><dd>Maybe user forgot to insert the removable media :: exit code 75</dd>
+<dt>Not Found Error</dt><dd>Occurs on --status request for a non-existant pin :: exit code 66</dd>
+<dt>Protocol Error</dt><dd>An error that should not normally occur :: exit code 76</dd>
+</dl>
+
+
+<p>One reason a protocol error may occur is if the user manually deletes one of the keys
+in removable media and then attempts to read the pin associated with the key.</p>
 
 <h2 id="FILES">FILES</h2>
 
-<p><code>~/.config/otpr/config.json</code></p>
+<dl>
+<dt>Configuration file </dt><dd>~/.config/otpr/config.json</dd>
+</dl>
 
-<h2 id="ENVIROMENT">ENVIROMENT</h2>
 
-<h2 id="BUGS">BUGS</h2>
+<p><code>otpr</code> is higly configurable.
+The intallation copy of config.json only shows what the user is most likely to want edit.
+For example, the user will most probably want to edit the default media directory.
+If one deletes this file, a new config.json file will be written showing all editable values.
+To get back the simpler intallation config.json version, remove the ~/.config/otpr directory, and
+the directory will be recreated as first installed.</p>
 
-<h2 id="LICENSE">LICENSE</h2>
+<dl>
+<dt>Secured cache directory </dt><dd>~/.cache/otpr/</dd>
+</dl>
 
-<h2 id="AUTHOR">AUTHOR</h2>
 
-<h2 id="COPYRIGHT">COPYRIGHT</h2>
+<p>This is where the encripted password files are found.
+There should be no need for the user to do anything here nor in the removable media.</p>
 
-<h2 id="SEE-ALSO">SEE ALSO</h2>
+<dl>
+<dt>Data directory </dt><dd>~/.local/share/otpr/</dd>
+</dl>
+
+
+<p>The data directory is currently unsused.
+It may contain a version file in the future.</p>
+
+<h2 id="LICENSE-AUTHOR-COPYRIGHT">LICENSE AUTHOR COPYRIGHT</h2>
+
+<ul>
+<li>MIT license</li>
+<li>Author: CarlosJHR64, carlosjhr@gmail.com</li>
+<li>(C) 2014</li>
+</ul>
+
 
 
   <ol class='man-decor man-foot man foot'>
