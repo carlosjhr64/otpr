@@ -1,7 +1,5 @@
 == TODO:
 
-* use clipboard when asked
-* semantics!
 * write man page
 * publish on rubygems
 
@@ -17,3 +15,5 @@
 * test hard coded validations
 * only show passphrase when asked
 * if s1!=s0, user should know the s0 about to be lost. verify that.
+* use clipboard when asked <= Nope... this is application level
+* semantics!

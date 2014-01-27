@@ -323,7 +323,7 @@ class Test_Helpers < Test::Unit::TestCase
     assert_equal 'aA1', pin
   end
 
-  def test_018_delete_pads
+  def test_018_delete_pins
     Stub.clear
     test_mode, CONFIG[:test_mode] = CONFIG[:test_mode], true
 
@@ -334,7 +334,7 @@ class Test_Helpers < Test::Unit::TestCase
     Dir.mkdir zang
 
     # Deleting empty zin and zang (zang unsalted)
-    Mock.delete_pads(zin, zang)
+    Mock.delete_pins(zin, zang)
     assert_equal 2, Stub.count
     refute_nil Stub.firsts=~/no.*salt/
     assert_equal 'zang_empty0', Stub.lasts
@@ -343,7 +343,7 @@ class Test_Helpers < Test::Unit::TestCase
 
     # Deleting empty zin, zang with 1 unpaired file (zang unsalted)
     system("touch #{zang}/abc")
-    Mock.delete_pads(zin, zang)
+    Mock.delete_pins(zin, zang)
     assert_equal 2, Stub.count
     refute_nil Stub.firsts=~/no.*salt/
     assert_equal 'zang_empty1', Stub.lasts
@@ -354,7 +354,7 @@ class Test_Helpers < Test::Unit::TestCase
     # Deleting zin and zang, unsalted zang
     system("touch #{zin}/abc")
     system("touch #{zang}/abc")
-    Mock.delete_pads(zin, zang)
+    Mock.delete_pins(zin, zang)
     assert_equal 2, Stub.count
     refute_nil Stub.firsts=~/no.*salt/
     assert_equal 'zang_empty0', Stub.lasts
@@ -369,7 +369,7 @@ class Test_Helpers < Test::Unit::TestCase
     system("touch #{zin}/salt")
     system("touch #{zang}/abc")
     system("touch #{zang}/salt")
-    Mock.delete_pads(zin, zang)
+    Mock.delete_pins(zin, zang)
     assert_equal 0, Stub.count
     refute system("test -e #{zin}/abc")
     refute system("test -e #{zin}/salt")
@@ -384,7 +384,7 @@ class Test_Helpers < Test::Unit::TestCase
     system("touch #{zang}/abc")
     system("touch #{zang}/xyz")
     system("touch #{zang}/salt")
-    Mock.delete_pads(zin, zang)
+    Mock.delete_pins(zin, zang)
     assert_equal 1, Stub.count
     assert_equal 'zang_multiple', Stub.firsts
     assert system("rm #{zang}/xyz")
@@ -401,7 +401,7 @@ class Test_Helpers < Test::Unit::TestCase
     system("touch #{zang}/abc")
     system("touch #{zang}/salt")
     system("mkdir #{zin}/saltine")
-    Mock.delete_pads(zin, zang)
+    Mock.delete_pins(zin, zang)
     assert_equal 1, Stub.count
     msg = Stub.firsts
     refute_nil msg=~/saltine/
@@ -417,7 +417,7 @@ class Test_Helpers < Test::Unit::TestCase
     system("touch #{zin}/abc")
     system("touch #{zin}/salt")
     system("touch #{zang}/salt")
-    Mock.delete_pads(zin, zang)
+    Mock.delete_pins(zin, zang)
     assert_equal 1, Stub.count
     msg = Stub.firsts
     refute_nil msg=~/Unpaired key deleted: abc/

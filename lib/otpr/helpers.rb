@@ -153,7 +153,7 @@ def delete_unpaired(zin, zang)
   end
 end
 
-def regen_pads(zin, zang)
+def regen_pins(zin, zang)
   files_in(zin) do |filename, name|
     filename2 = File.join(zang, name)
     if File.exist?(filename2)
@@ -168,7 +168,7 @@ def regen_pads(zin, zang)
   end
 end
 
-def delete_pads(zin, zang)
+def delete_pins(zin, zang)
   files_in(zin) do |filename, name|
     File.unlink(filename)
     filename2 = File.join(zang, name)

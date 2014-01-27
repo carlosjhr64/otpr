@@ -66,7 +66,7 @@ Options:
   -C --copy    Copy pin content to a new pin.
   -M --move    Move pin content to a new pin.
   --erase      Deletes all pins.
-  --regen-all  Re-encripts all pads.
+  --regen-all  Re-encripts all pins.
   --remove-unpaired
   --remove-unpaired-keys
   --remove-unpaired-files
@@ -74,7 +74,7 @@ Options:
   -R --random  Create a random password.
   -b --batch   Turns off interactive mode.
   -l --clear   Clears screen after pin entries.
-  -g --regen   Re-encripts pad.
+  -g --regen   Re-encripts pin.
   -e --echo --no-echo.
   -w --overwrite --no-overwrite.
   -P --pin-validation --no-pin-validation
@@ -150,7 +150,7 @@ More help: gem man otpr
     :no_yin_yang        => 'Pad files not found.',
     :not_bucket_full    => 'Did not get a full bucket.',
     :could_not_set      => 'Could not set secret.',
-    :could_not_regen    => 'Could not regenerate a pad.',
+    :could_not_regen    => 'Could not re-encript a pin.',
     :pin_inconsistent   => 'Pin is missing a key.',
     :pin_does_not_exist => 'Pin does not exist.',
     :pin_exist          => 'Pin exist.',
