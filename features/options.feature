@@ -8,14 +8,14 @@ Feature: Options and Usage Errors
     * Given arguments "-v"
     * When run
     * Then status is "0"
-    * Then stdout is "2.0.0.alpha"
+    * Then stdout is "2.0.0"
     * Then stderr is ""
 
   Scenario: --version
     * Given arguments "--version"
     * When run
     * Then status is "0"
-    * Then stdout is "2.0.0.alpha"
+    * Then stdout is "2.0.0"
     * Then stderr is ""
 
   Scenario: -h

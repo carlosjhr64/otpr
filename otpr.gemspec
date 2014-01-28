@@ -1,14 +1,14 @@
 Gem::Specification.new do |s|
 
   s.name     = 'otpr'
-  s.version  = '2.0.0.alpha'
+  s.version  = '2.0.0'
 
   s.homepage = 'https://github.com/carlosjhr64/otpr'
 
   s.author   = 'CarlosJHR64'
   s.email    = 'carlosjhr64@gmail.com'
 
-  s.date     = '2014-01-27'
+  s.date     = '2014-01-28'
   s.licenses = ['MIT']
 
   s.description = <<DESCRIPTION
@@ -31,6 +31,7 @@ bin/otpr
 config/config.json
 examples/assertion_testing
 features/assertion.feature
+features/edge.feature
 features/main.feature
 features/options.feature
 features/step_definitions/main_steps.rb
