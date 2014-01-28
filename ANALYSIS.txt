@@ -207,7 +207,7 @@
 
 # I can add these two entropies toguether.
 
-  s = s0 + s1
+  s = s1 + s0 # I'll explain why I chose this order later...
   #=> Like "101..."
   s.length
   #=> 512
@@ -216,14 +216,14 @@
 
 # BTW, + and * behave as expected for the right choice of base(2**n).
 
-  a = s0*H + s1*H
-  b = (s0 + s1)*H
+  a = s1*H + s0*H
+  b = (s1 + s0)*H
   # Works for H
   a == b
   # => true
 
-  a = s0*Q + s1*Q
-  b = (s0 + s1)*Q
+  a = s1*Q + s0*Q
+  b = (s1 + s0)*Q
   # Doesn't work for Q
   a == b
   # => false
@@ -252,13 +252,13 @@
 # for it to treat them as truly random:
 
   ################### 256  truly     random? numbers... ############
-  s1 = E.new.increase(256, true){|n| SecureRandom.random_number(n) }
-  s1.randomness
+  s0 = E.new.increase(256, true){|n| SecureRandom.random_number(n) }
+  s0.randomness
   #=> 256
   # or you can do...
-  s1 = E[0]
-  s1.pp(256, true){|n| rand(n)} # pp aliases increase
-  s1.randomness
+  s0 = E[0]
+  s0.pp(256, true){|n| rand(n)} # pp aliases increase
+  s0.randomness
   #=> 256
 
 # We'll deal with how to get true randomness later.
@@ -366,21 +366,22 @@
 # The salt is combined from two salt files, one in the removable media (yin salt), and
 # one in a secured cache directory (yang salt).
 
-  s0 = E[256]
+  s0 = E.new.pp(256, true){|n| rand(n)}
   s0.randomness
-  #=> 0
-  s1 = E.new.pp(256, true){|n| rand(n)}
-  s1.randomness
   #=> 256
+  s1 = E[256]
+  s1.randomness
+  #=> 0
 
-# For the yang salt, the library gets random bits from random.org to guarantee randomness.
+# For the yin salt, the library gets random bits from random.org to guarantee randomness.
 # But for our analysis here, we just call rand and pretend it's random.
+# I chose yin for the true random salt because yin is thought of as the directories for keys.
  
-# s0*Q and s1*Q is what's stored in the salt files.
+# s1*Q and s0*Q is what's stored in the salt files.
 # This makes it easier to inspect.
 # The combined salt is:
 
-  s = s0*Q + s1*Q
+  s = s1*Q + s0*Q
   s.randomness
   #=> 256
   s.bits
@@ -396,7 +397,7 @@
   p = Entropia.new 'ThePin', Q # whatever the user says
   w = p + s
   # or expanded out...
-  w = p + s0*Q + s1*Q
+  w = p + s1*Q + s0*Q
   # Looks like "ThePin..."
   w.randomness
   #=> 256
@@ -406,7 +407,7 @@
   #=> false
 
 # I don't know if it matters, but in case the digest preserves any information,
-# I feed in order of increasing randomness: p, s0, s1 => p+s0*Q+s1*Q.
+# I feed in order of increasing randomness: p, s1, s0 => p+s1*Q+s0*Q.
 # The SHA512 digest of w is a binary string of length 64.
 
   k0 = D[w]
@@ -428,7 +429,7 @@
 # since our salt had at least 256 bits of randomness, this key should be good to go!
 # Expanded out, k0 is:
 
-  k0 = D[ p + s0*Q + s1*Q ]
+  k0 = D[ p + s1*Q + s0*Q ]
 
 # Now we can do our first encription.
 # Given our plain text passwoard, P:
@@ -444,9 +445,9 @@
 # Tada!
 # Expanded all out:
 
-   c0 = D[ p + s0*Q + s1*Q ] ^ P
+   c0 = D[ p + s1*Q + s0*Q ] ^ P
 
-   D[ p + s0*Q + s1*Q ] ^ c0
+   D[ p + s1*Q + s0*Q ] ^ c0
    #=> "Top_Secret_Password!"
 
 # To store the encripted secret, and allow the use of multiple pins,
@@ -457,9 +458,9 @@
    f = C[w]*W
 
    # or expanded out...
-   f = C[p + s0*Q + s1*Q]*W
+   f = C[p + s1*Q + s0*Q]*W
    # You can verify that
-   C[w]*W == C[p + s0*Q + s1*Q]*W
+   C[w]*W == C[p + s1*Q + s0*Q]*W
    #=> true
 
 # I save the secret in the cache directory under the name of f.

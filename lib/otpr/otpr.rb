@@ -21,7 +21,7 @@ module OTPR
         raise Error, :media_not_found
       end
 
-      @salt  = Otpr.salt(yindir) + Otpr.salt(yangdir, true)
+      @salt  = Otpr.salt(yindir, true) + Otpr.salt(yangdir)
       digest = DIGEST.digest(pin+@salt)
       @key   = Key.new(digest)
 
