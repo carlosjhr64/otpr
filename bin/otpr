@@ -75,7 +75,7 @@ begin
 
   # Otp object from pin. Verify that it has the 2 split keys (or none).
   otpr = Otpr.new(get_pin, MEDIA_CACHE, USERSPACE.cachedir)
-  refute otpr.inconsistent?, :pin_inconsistent unless OPTIONS[:status]
+  refute(otpr.inconsistent?, :pin_inconsistent) unless OPTIONS[:status]
 
   # Creates the new pin.
   if OPTIONS[:create]

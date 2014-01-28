@@ -59,6 +59,7 @@
     <a href="#OPTIONS">OPTIONS</a>
     <a href="#RESPONSES">RESPONSES</a>
     <a href="#FILES">FILES</a>
+    <a href="#SEMANTICS">SEMANTICS</a>
     <a href="#LICENSE-AUTHOR-COPYRIGHT">LICENSE AUTHOR COPYRIGHT</a>
   </div>
 
@@ -147,7 +148,7 @@ The original default is to show, although one can change this default in the con
 the primary final response is to show the pin's password with exit code 0.
 The main exception to this occurs when run with the --status option,
 in which case it will show either <code>OK</code>, <code>INCONSISTENT</code>, or <code>NOT FOUND</code>,
-with exit code 0, 76, and 66 respectively.</p>
+with exit code 0, 76, or 66 respectively.</p>
 
 <p>Responses and exit codes on errors or exceptions are as follows:</p>
 
@@ -192,6 +193,12 @@ There should be no need for the user to do anything here nor in the removable me
 
 <p>The data directory is currently unsused.
 It may contain a version file in the future.</p>
+
+<h2 id="SEMANTICS">SEMANTICS</h2>
+
+<p>There are problems with semantics in the library code and documentation.
+For example, my use of the word "inconsistent" does not really fit the word's meaning.
+I'd appreciate suggestions (and any suggestion in other areas) to improve <code>otpr</code>.</p>
 
 <h2 id="LICENSE-AUTHOR-COPYRIGHT">LICENSE AUTHOR COPYRIGHT</h2>
 

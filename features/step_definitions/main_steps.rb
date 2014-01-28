@@ -19,11 +19,25 @@ Dir.mkdir DATADIR
 H = {}
 
 def _popen(command, lines)
-  IO.popen(command, 'w+'){|p|
-    lines.each{|line| p.puts line}
-    H['stdout'] = (a=p.gets)? a.chomp : a
-  }
-  H['status'] = $?.exitstatus
+  H['stdout'], H['stderr'] = '', ''
+  Open3.popen3(command) do | stdin, stdout, stderr, wait |
+    out = Thread.new do
+      while line = stdout.gets
+        H['stdout'] += line
+      end
+      H['stdout'].chomp!
+    end
+    err = Thread.new do
+      while line = stderr.gets
+        H['stderr'] += line
+      end
+      H['stderr'].chomp!
+    end
+    lines.each{|line| stdin.puts line}
+    out.join
+    err.join
+    H['status'] = wait.value.exitstatus
+  end
 end
 
 

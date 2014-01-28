@@ -151,7 +151,7 @@ More help: gem man otpr
     :not_bucket_full    => 'Did not get a full bucket.',
     :could_not_set      => 'Could not set secret.',
     :could_not_regen    => 'Could not re-encript a pin.',
-    :pin_inconsistent   => 'Pin is missing a key.',
+    :pin_inconsistent   => 'Pin is missing a key or cache file.',
     :pin_does_not_exist => 'Pin does not exist.',
     :pin_exist          => 'Pin exist.',
     :zang_empty0        => 'Zang did not have salt.',

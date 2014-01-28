@@ -138,6 +138,12 @@ There should be no need for the user to do anything here nor in the removable me
 The data directory is currently unsused.
 It may contain a version file in the future.
 
+## SEMANTICS
+
+There are problems with semantics in the library code and documentation.
+For example, my use of the word "inconsistent" does not really fit the word's meaning.
+I'd appreciate suggestions (and any suggestion in other areas) to improve `otpr`.
+
 ## LICENSE AUTHOR COPYRIGHT
 
 * MIT license

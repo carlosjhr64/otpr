@@ -128,7 +128,7 @@ User may choose to not to show the password\. The original default is to show, a
 The directory where to the removable media\.
 .
 .SH "RESPONSES"
-When \fBotpr\fR runs succesfully, the primary final response is to show the pin\'s password with exit code 0\. The main exception to this occurs when run with the \-\-status option, in which case it will show either \fBOK\fR, \fBINCONSISTENT\fR, or \fBNOT FOUND\fR, with exit code 0, 76, and 66 respectively\.
+When \fBotpr\fR runs succesfully, the primary final response is to show the pin\'s password with exit code 0\. The main exception to this occurs when run with the \-\-status option, in which case it will show either \fBOK\fR, \fBINCONSISTENT\fR, or \fBNOT FOUND\fR, with exit code 0, 76, or 66 respectively\.
 .
 .P
 Responses and exit codes on errors or exceptions are as follows:
@@ -178,6 +178,9 @@ Data directory
 .
 .P
 The data directory is currently unsused\. It may contain a version file in the future\.
+.
+.SH "SEMANTICS"
+There are problems with semantics in the library code and documentation\. For example, my use of the word "inconsistent" does not really fit the word\'s meaning\. I\'d appreciate suggestions (and any suggestion in other areas) to improve \fBotpr\fR\.
 .
 .SH "LICENSE AUTHOR COPYRIGHT"
 .
