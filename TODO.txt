@@ -1,12 +1,13 @@
 == TODO:
 
-* publish on rubygems
 
 == File List
 
 
-== DONE Jan 27, 2014
+== DONE Jan 28, 2014
+* publish on rubygems
 
+== DONE Jan 27, 2014
 * make s1 (yin salt) real rand
 * SHA512 should be fed p + s0 + s1 was already done.
 * use time to add some randomness...
