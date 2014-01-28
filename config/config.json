@@ -26,5 +26,5 @@
   "clear_command": "clear",
 
   "comment": "See lib/otpr/config.rb for other available keys.",
-  "comment": ""
+  "comment": "MIT licensed (C) 2014 CarlosJHR64 carlosjhr64@gmail.com"
 }
